@@ -5,7 +5,11 @@ const Card = ({ id, img, alt, title, price, rating, isNew }) => {
   console.log("Navigating to /productdetail/" + id);
   const whitestar = 5 - Math.floor(rating);
   return (
-    <Link to={"/productdetail/" + id + "/"} className="block">
+    <Link to={"/productdetail/" + id + "/#"} className="block"
+      onClick={() => {
+        window.scrollTo(0, 0);
+      }}
+      >
       <div className="border-4 border-red-700 rounded relative w-[300px] h-[450px] flex flex-col">
         <img src={img} alt={alt} className="w-full h-[270px] object-cover rounded-t" />
 

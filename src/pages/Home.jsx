@@ -49,7 +49,7 @@ const Home = () => {
         </section>
 
         <section className="new-products mt-8">
-          <div className="">
+          <div className="min-h-[650px]">
             <NewCard />
           </div>
         </section>
