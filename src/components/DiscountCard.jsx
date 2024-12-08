@@ -53,6 +53,20 @@ const DiscountCard = () => {
   const decreaseMaxCards = () => setMaxCards((prev) => Math.max(prev - 4, 4)); // Remove 4 cards
 
   const formatPrice = (price) => new Intl.NumberFormat().format(price);
+  const countTimeleft = (end_time) => {
+    const end = new Date(end_time).getTime();
+    const now = new Date().getTime();
+    const timeRemaining = end - now;
+
+    if (timeRemaining <= 0) {
+      return { hours: 0, minutes: 0, seconds: 0 };
+    } else {
+      const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+      const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+      return { hours, minutes, seconds };
+    }
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -66,14 +80,6 @@ const DiscountCard = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <h2 className="text-2xl font-bold text-black-600">Flash Sale</h2>
-
-            <div className="countdown-container flex items-center space-x-2 ml-4">
-              <span className="bg-[#F7CDCF] text-black font-bold px-4 py-2 rounded-md">{String(timeLeft.hours).padStart(2, "0")}</span>
-              <span className="text-xl">:</span>
-              <span className="bg-[#F7CDCF] text-black font-bold px-4 py-2 rounded-md">{String(timeLeft.minutes).padStart(2, "0")}</span>
-              <span className="text-xl">:</span>
-              <span className="bg-[#F7CDCF] text-black font-bold px-4 py-2 rounded-md">{String(timeLeft.seconds).padStart(2, "0")}</span>
-            </div>
           </div>
         </div>
       </div>
@@ -99,8 +105,18 @@ const DiscountCard = () => {
                   alt={sale.item.name}
                   className="w-full h-[270px] object-cover rounded-t-lg"
                 />
-
+                
                 <div className="product-infos p-4 flex flex-col justify-between">
+                  
+                  {/* berakhir pada sale.end_time*/}
+                  <div className="countdown flex items-center justify-between">
+                    <span className="text-lg font-bold text-[#C62E2E]">Berakhir dalam</span>
+                    <span className="text-lg font-bold bg-[#C62E2E] text-white">
+                      {countTimeleft(sale.end_time).hours}:
+                      {countTimeleft(sale.end_time).minutes}:
+                      {countTimeleft(sale.end_time).seconds}
+                    </span>
+                  </div>
                   <div className="rating-lama flex items-center mb-4 mt-5 text-base">
                     {[...Array(5)].map((_, starIndex) => (
                       <i
@@ -111,10 +127,10 @@ const DiscountCard = () => {
                     <span className="ml-2 text-gray-700">({sale.item.rating})</span>
                   </div>
 
-                  <h3 className="text-base font-semibold text-gray-800 mt-4 text-left">{sale.item.name}</h3>
+                  <h3 className="text-base font-semibold text-gray-800 text-left">{sale.item.name}</h3>
 
                   <div className="price flex justify-between mt-auto">
-                    {timeLeft.hours > 0 || timeLeft.minutes > 0 || timeLeft.seconds > 0 ? (
+                    {sale.end_time > new Date().toISOString() ? (
                       <>
                         <span className="discount-price text-lg font-bold text-[#C62E2E]">Rp. {formatPrice(sale.flash_price)}</span>
                         <span className="original-price text-lg line-through text-gray-500">Rp. {formatPrice(sale.item.price)}</span>

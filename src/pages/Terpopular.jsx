@@ -1,12 +1,35 @@
-import React, { useState } from "react";
-import productData from "../services/ProductData";
+import React, { useState, useEffect } from "react";
 import Card from "../components/KategoriCard"; // Komponen untuk menampilkan kartu produk
 import Header from "../components/Header";
 import Footer from "../components/Footer"; // Komponen untuk menampilkan footer
 
 const Terpopular = () => {
+  const [products, setProducts] = useState([]); // Data produk dari API
   const [filter, setFilter] = useState("terbaru"); // Default filter: terbaru
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Untuk mengontrol dropdown
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
+
+  const formatPrice = (price) => new Intl.NumberFormat().format(price);
+
+  // Fungsi untuk mengambil data dari API
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:3000/api/items?take=100&filterBy=popular"); // Endpoint untuk produk populer
+      const data = await response.json();
+      setProducts(data);
+    } catch (err) {
+      setError("Gagal memuat data produk.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Mengambil data saat komponen dimuat
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   // Fungsi toggle dropdown
   const toggleDropdown = () => {
@@ -20,24 +43,38 @@ const Terpopular = () => {
   };
 
   // Urutkan data berdasarkan filter
-  const sortedProductData = [...productData].sort((a, b) => {
-    switch (filter) {
-      case "terbaru":
-        return productData.indexOf(a) - productData.indexOf(b);
-      case "termahal":
-        return parseInt(b.price.replace(/[^0-9]/g, "")) - parseInt(a.price.replace(/[^0-9]/g, ""));
-      case "termurah":
-        return parseInt(a.price.replace(/[^0-9]/g, "")) - parseInt(b.price.replace(/[^0-9]/g, ""));
-      default:
-        return 0;
-    }
-  });
+  const sortedProductData = products.length
+    ? [...products].sort((a, b) => {
+        switch (filter) {
+          case "terbaru":
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          case "termahal":
+            return b.price - a.price;
+          case "termurah":
+            return a.price - b.price;
+          default:
+            return 0;
+        }
+      })
+    : [];
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow mt-24 text-center">
+          <p>Loading...</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <main className="mt-10">
       <Header />
       {/* Subheader */}
-      <div className="flex justify-between items-center mt-20  p-6 relative">
+      <div className="flex justify-between items-center mt-20 p-6 relative">
         <h1 className="text-xl font-bold flex items-center">
           <i className="fas fa-gem mr-2"></i> Terpopuler
         </h1>
@@ -62,11 +99,21 @@ const Terpopular = () => {
 
       <hr className="mb-4" />
       {/* Grid Produk */}
-      <section className="px-8">
-        {sortedProductData.length > 0 ? (
+      <section className="px-8 min-h-screen">
+        {error ? (
+          <p className="text-center text-red-500">{error}</p>
+        ) : sortedProductData.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-8 lg:grid-cols-4 gap-8 mb-10 ml-8">
             {sortedProductData.map((product, index) => (
-              <Card key={index} {...product} />
+              <Card
+                key={index}
+                id={product.id}
+                img={"http://localhost:3000/" + product.images[0].url}
+                alt={product.name}
+                title={product.name}
+                price={"Rp. " + formatPrice(product.price)}
+                rating={product.rating || 4.5} // Placeholder untuk rating
+              />
             ))}
           </div>
         ) : (
