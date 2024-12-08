@@ -1,18 +1,34 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminHeader from '../components/AdminHeader'; 
 import AdminFooter from '../components/AdminFooter'; 
 import Sidebar from '../components/Sidebar'; 
-import { Link } from 'react-router-dom';
 
 const AdminFlashSale = () => {
   const [formData, setFormData] = useState({
-    productName: '',
-    originalPrice: '',
-    flashSalePrice: '',
-    startTime: '',
-    endTime: '',
-    image: null, 
+    item_id: '',
+    flash_price: '',
+    start_time: '',
+    end_time: '',
   });
+
+  const [items, setItems] = useState([]); // State untuk daftar item
+  const [loading, setLoading] = useState(false); // State untuk loading
+
+  // Fetch daftar item dari API
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/items'); // Ganti URL sesuai endpoint Anda
+        if (!response.ok) throw new Error('Failed to fetch items');
+        const data = await response.json();
+        setItems(data);
+      } catch (error) {
+        console.error('Error fetching items:', error.message);
+      }
+    };
+
+    fetchItems();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,18 +38,39 @@ const AdminFlashSale = () => {
     });
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setFormData({
-      ...formData,
-      image: file, 
-    });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Flash Sale Data:', formData);
+    setLoading(true);
 
+    try {
+      const response = await fetch('http://localhost:3000/api/flashsales', { // Ganti URL sesuai endpoint Anda
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create flash sale');
+      }
+
+      const data = await response.json();
+      console.log('Flash Sale Created:', data);
+      alert('Flash Sale berhasil ditambahkan!');
+      setFormData({
+        item_id: '',
+        flash_price: '',
+        start_time: '',
+        end_time: '',
+      });
+    } catch (error) {
+      console.error('Error creating flash sale:', error.message);
+      alert('Gagal menambahkan Flash Sale!');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,38 +88,31 @@ const AdminFlashSale = () => {
 
             <form onSubmit={handleSubmit} className="bg-white p-6 shadow-lg rounded-lg">
               <div className="mb-4">
-                <label htmlFor="productName" className="block text-gray-700">Nama Produk</label>
-                <input
-                  type="text"
-                  id="productName"
-                  name="productName"
-                  value={formData.productName}
+                <label htmlFor="item_id" className="block text-gray-700">Pilih Produk</label>
+                <select
+                  id="item_id"
+                  name="item_id"
+                  value={formData.item_id}
                   onChange={handleChange}
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-lg"
-                  placeholder="Masukkan Nama Produk"
-                  required />
+                  required
+                >
+                  <option value="">Pilih Produk</option>
+                  {items.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name} - Rp {item.price.toLocaleString()}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="mb-4">
-                <label htmlFor="originalPrice" className="block text-gray-700">Harga Asli</label>
+                <label htmlFor="flash_price" className="block text-gray-700">Harga Flash Sale</label>
                 <input
                   type="number"
-                  id="originalPrice"
-                  name="originalPrice"
-                  value={formData.originalPrice}
-                  onChange={handleChange}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-lg"
-                  placeholder="Masukkan Harga Asli"
-                  required />
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="flashSalePrice" className="block text-gray-700">Harga Flash Sale</label>
-                <input
-                  type="number"
-                  id="flashSalePrice"
-                  name="flashSalePrice"
-                  value={formData.flashSalePrice}
+                  id="flash_price"
+                  name="flash_price"
+                  value={formData.flash_price}
                   onChange={handleChange}
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-lg"
                   placeholder="Masukkan Harga Flash Sale"
@@ -90,44 +120,35 @@ const AdminFlashSale = () => {
               </div>
 
               <div className="mb-4">
-                <label htmlFor="startTime" className="block text-gray-700">Waktu Mulai</label>
+                <label htmlFor="start_time" className="block text-gray-700">Waktu Mulai</label>
                 <input
                   type="datetime-local"
-                  id="startTime"
-                  name="startTime"
-                  value={formData.startTime}
+                  id="start_time"
+                  name="start_time"
+                  value={formData.start_time}
                   onChange={handleChange}
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-lg"
                   required />
               </div>
 
               <div className="mb-4">
-                <label htmlFor="endTime" className="block text-gray-700">Waktu Berakhir</label>
+                <label htmlFor="end_time" className="block text-gray-700">Waktu Berakhir</label>
                 <input
                   type="datetime-local"
-                  id="endTime"
-                  name="endTime"
-                  value={formData.endTime}
+                  id="end_time"
+                  name="end_time"
+                  value={formData.end_time}
                   onChange={handleChange}
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-lg"
                   required />
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="image" className="block text-gray-700">Gambar Produk</label>
-                <input
-                  type="file"
-                  id="image"
-                  name="image"
-                  onChange={handleImageChange}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-lg"
-                  accept="image/*" />
               </div>
 
               <button
                 type="submit"
-                className="bg-[#C62E2E] text-white px-6 py-2 rounded-lg mt-4">
-                Tambah Produk
+                className="bg-[#C62E2E] text-white px-6 py-2 rounded-lg mt-4"
+                disabled={loading}
+              >
+                {loading ? 'Loading...' : 'Tambah Produk'}
               </button>
             </form>
           </div>
