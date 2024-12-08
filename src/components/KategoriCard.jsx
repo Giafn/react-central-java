@@ -6,6 +6,7 @@ const Card = ({ id, img, alt, title, price, rating, isNew }) => {
   const whitestar = 5 - Math.floor(rating);
   return (
     <Link to={"/productdetail/" + id + "/#"} className="block"
+      // onclick scroll to top
       onClick={() => {
         window.scrollTo(0, 0);
       }}

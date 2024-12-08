@@ -76,7 +76,7 @@ const ProductDetail = () => {
   if (!product) {
     return <div>Loading...</div>;
   }
-
+  console.log(product.flashsale.length == 0)
   const rating = 4.5; // Rating produk
   return (
     <div className="bg-white text-gray-800">
@@ -135,7 +135,20 @@ const ProductDetail = () => {
               </div>
             </div>
             <div className="mt-4 text-red-600 text-xl font-bold">
-              Rp. {product.price.toLocaleString()}
+            <span>
+              Rp.{" "}
+              {product.flashsale.length >= 1
+                ? product.flashsale[0].flash_price.toLocaleString() 
+                : product.price.toLocaleString()}
+              
+              {/* Jika ada flash sale, tampilkan harga diskon dengan coretan */}
+              {product.flashsale && (
+                <span className="text-sm line-through text-gray-500 ml-2">
+                  Rp. {product.price.toLocaleString()}
+                </span>
+              )}
+            </span>
+
             </div>
             <div className="flex items-center mt-4 space-x-2">
               <div className="flex items-center border border-gray-300 rounded-md h-12">
@@ -157,7 +170,7 @@ const ProductDetail = () => {
                 className="bg-red-600 text-white px-4 py-2 rounded-md flex items-center h-12"
                 onClick={addToCart}
               >
-                Beli Sekarang
+                Masukan Kerjanjang
               </button>
             </div>
           </div>
