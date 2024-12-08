@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"; // Import Link untuk navigasi
 
 const Card = ({ id, img, alt, title, price, rating, isNew }) => {
   console.log("Navigating to /productdetail/" + id);
+  const whitestar = 5 - Math.floor(rating);
   return (
     <Link to={"/productdetail/" + id + "/"} className="block">
       <div className="border-4 border-red-700 rounded relative w-[300px] h-[450px] flex flex-col">
@@ -13,8 +14,11 @@ const Card = ({ id, img, alt, title, price, rating, isNew }) => {
         <div className="p-4">
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center">
-              {[...Array(rating)].map((_, i) => (
+              {[...Array(Math.floor(rating))].map((_, i) => (
                 <i key={i} className="mt-1 fas fa-star text-yellow-500"></i>
+              ))}
+              {[...Array(whitestar)].map((_, i) => (
+                <i key={i} className="mt-1 fas fa-star text-gray-300"></i>
               ))}
               <span className="mt-1 ml-1 text-base">({rating})</span>
             </div>
