@@ -22,7 +22,7 @@ const Login = () => {
   
       if (!response.ok) {
         const errorData = await response.json();
-        alert(errorData.message || "Login gagal");
+        alert(errorData.message || "Login failed");
         return;
       }
   
@@ -30,7 +30,7 @@ const Login = () => {
       const token = data.token;
       const role = data.user.is_admin ? "admin" : "user";
   
-      // Simpan token dan role di localStorage
+      // Save token and role in localStorage
       localStorage.setItem("role", role);
       localStorage.setItem("token", token);
   
@@ -41,14 +41,13 @@ const Login = () => {
         console.log("Login successful as admin");
         navigate("/admin/dashboard");
       } else {
-        alert("Role tidak dikenali.");
+        alert("Unknown role.");
       }
     } catch (error) {
-      console.error("Terjadi kesalahan:", error);
-      alert("Terjadi kesalahan saat login.");
+      console.error("Error occurred:", error);
+      alert("Error occurred during login.");
     }
   };
-  
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -94,9 +93,12 @@ const Login = () => {
             <div className="mt-6 text-sm">atau masuk dengan</div>
             <div className="flex items-center mt-6">
               <span className="flex-grow h-[1px] bg-black"></span>
-              <a href="googlelogin.html" className="mx-4" aria-label="Login with Google">
+              {/* Google Login Button */}
+              <div 
+                className="mx-4 cursor-pointer" 
+                onClick={() => window.location.href = "http://localhost:3000/api/auth/google"}>
                 <img src="/assets/images/google-icon.png" alt="Google" className="w-8 h-8"/>
-              </a>
+              </div>
               <span className="flex-grow h-[1px] bg-black"></span>
             </div>
           </div>

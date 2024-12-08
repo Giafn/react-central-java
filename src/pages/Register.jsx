@@ -40,6 +40,38 @@ const Register = () => {
     }
   };
 
+  const handleGoogleLogin = async (response) => {
+    const { tokenId } = response;
+    try {
+      const googleLoginResponse = await fetch("http://localhost:3000/api/auth/google", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token: tokenId }),
+      });
+
+      const data = await googleLoginResponse.json();
+      if (googleLoginResponse.ok) {
+        const { token, user } = data;
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("role", user.is_admin ? "admin" : "user");
+
+        // Navigate based on user role
+        if (user.is_admin) {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/home");
+        }
+      } else {
+        alert(data.message || "Login dengan Google gagal");
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan: " + error.message);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-white font-sans">
       <header className="bg-[#C62E2E] text-white p-4 flex flex-col md:flex-row md:items-left md:justify-between">
@@ -103,7 +135,12 @@ const Register = () => {
           <div className="text-center my-4">atau masuk dengan</div>
           <div className="flex items-center mt-4 justify-center">
             <span className="flex-grow h-[1px] bg-black" />
-            <a href="googlelogin.html" className="mx-4" aria-label="Login with Google">
+            <a
+              href="javascript:void(0)"
+              onClick={() => window.google.accounts.id.prompt()}
+              className="mx-4"
+              aria-label="Login with Google"
+            >
               <img src="/assets/images/google-icon.png" alt="Google" className="w-8 h-8" />
             </a>
             <span className="flex-grow h-[1px] bg-black" />

@@ -18,6 +18,11 @@ const ProductDetail = () => {
       try {
         const response = await fetch(`http://localhost:3000/api/items/${id}`);
         const data = await response.json();
+        if (response.status >= 400) {
+          if (data.message == "Item not found") {
+            window.location.href = "/";
+          }
+        }
         if (data) {
           setProduct(data);
           setMainImage("http://localhost:3000/" + data.images[0]?.url || ""); // Set gambar pertama
@@ -307,7 +312,7 @@ const ProductDetail = () => {
                     img={"http://localhost:3000/" + product.images[0]?.url}
                     alt={product.name}
                     title={product.name}
-                    price={product.price}
+                    price={"Rp. " + product.price.toLocaleString() || 0}
                     rating={4.5} // Assuming count_sold as a placeholder for rating
                     isNew={isNew(product.createdAt)}
                   />
