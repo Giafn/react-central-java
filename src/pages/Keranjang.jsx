@@ -60,6 +60,20 @@ const Keranjang = () => {
     }
   };
 
+  // fungsi untuk menghapus item dari keranjang
+  const deleteItem = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:3000/api/cart/delete/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      console.error("Error deleting cart item:", error);
+    }
+  };
+
   // Fungsi untuk menunda request update quantity
   const handleQuantityChange = (id, delta) => {
     setCartItems((prevItems) =>
@@ -98,7 +112,8 @@ const Keranjang = () => {
     setSelectAll(!selectAll);
   };
 
-  const handleDeleteItem = (id) => {
+  const handleDeleteItem = async (id) => {
+    await deleteItem(id);
     setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
     setSelectedItems((prevSelected) => prevSelected.filter((itemId) => itemId !== id));
   };
