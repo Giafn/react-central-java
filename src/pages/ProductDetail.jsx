@@ -67,7 +67,29 @@ const ProductDetail = () => {
 
   // Fungsi untuk menambah produk ke keranjang
   const addToCart = () => {
-    console.log("Produk ditambahkan ke keranjang:", product);
+    const qty = parseInt(document.getElementById("quantity").value);
+    const itemId = product.id;
+    
+    // call axios with post method ke localhost:3000/api/cart dengan bearer token jika unauthorized maka logoutkan dan arahkan ke login
+    axios.post("http://localhost:3000/api/cart", {
+      item_id: itemId,
+      qty: qty,
+    }, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }).then((response) => {
+      alert("Produk berhasil dimasukkan ke keranjang!");
+      // Redirect ke halaman keranjang
+      window.location.href = "/keranjang";
+    }).catch((error) => {
+      console.error("Error add to cart:", error);
+      if (error.response.status === 401) {
+        alert("Anda harus login terlebih dahulu!");
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      }
+    });
   };
 
   const isNew = (createdAt) => {
