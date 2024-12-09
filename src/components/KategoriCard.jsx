@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom"; // Import Link untuk navigasi
 
 const Card = ({ id, img, alt, title, price, rating, isNew }) => {
-  console.log("Navigating to /productdetail/" + id);
   const whitestar = 5 - Math.floor(rating);
   return (
     <Link to={"/productdetail/" + id + "/#"} className="block"

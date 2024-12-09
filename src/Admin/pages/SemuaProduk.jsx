@@ -29,7 +29,6 @@ const SemuaProduk = () => {
         }
 
         const data = await response.json();
-        console.log(data);
         setProducts(data); // Asumsikan data API memiliki properti `products`
       } catch (err) {
         setError(err.message);

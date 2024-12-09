@@ -57,7 +57,6 @@ const AdminFlashSale = () => {
       }
 
       const data = await response.json();
-      console.log('Flash Sale Created:', data);
       alert('Flash Sale berhasil ditambahkan!');
       setFormData({
         item_id: '',

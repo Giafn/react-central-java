@@ -35,10 +35,8 @@ const Login = () => {
       localStorage.setItem("token", token);
   
       if (role === "user") {
-        console.log("Login successful as user");
         navigate("/home");
       } else if (role === "admin") {
-        console.log("Login successful as admin");
         navigate("/admin/dashboard");
       } else {
         alert("Unknown role.");

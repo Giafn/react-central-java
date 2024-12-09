@@ -6,10 +6,6 @@ const SecurityTab = () => {
 
   const handleChangePassword = (e) => {
     e.preventDefault();
-    // Logic untuk mengubah password
-    console.log("Password lama:", password);
-    console.log("Password baru:", newPassword);
-    // Reset form
     setPassword("");
     setNewPassword("");
   };

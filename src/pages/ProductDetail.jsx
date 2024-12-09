@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios"; // Menggunakan Axios
 import { useParams } from "react-router-dom"; // Untuk mengambil params dari URL
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -16,16 +17,16 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProductData = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/items/${id}`);
-        const data = await response.json();
+        const response = await axios.get(`http://localhost:3000/api/items/${id}`);
+        const data = response.data;
         if (response.status >= 400) {
-          if (data.message == "Item not found") {
+          if (data.message === "Item not found") {
             window.location.href = "/";
           }
         }
         if (data) {
           setProduct(data);
-          setMainImage("http://localhost:3000/" + data.images[0]?.url || ""); // Set gambar pertama
+          setMainImage(`http://localhost:3000/${data.images[0]?.url || ""}`); // Set gambar pertama
         }
       } catch (error) {
         console.error("Error fetching product data:", error);
@@ -34,10 +35,10 @@ const ProductDetail = () => {
 
     const fetchPopular = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/items?limit=4&filterBy=popular`);
-        const data = await response.json();
-
-        setPopular(data);
+        const response = await axios.get(`http://localhost:3000/api/items`, {
+          params: { limit: 4, filterBy: "popular" },
+        });
+        setPopular(response.data);
       } catch (err) {
         console.error("Error fetching popular products:", err);
       }
@@ -67,7 +68,6 @@ const ProductDetail = () => {
   // Fungsi untuk menambah produk ke keranjang
   const addToCart = () => {
     console.log("Produk ditambahkan ke keranjang:", product);
-    // Implementasi logika untuk menambahkan produk ke keranjang
   };
 
   const isNew = (createdAt) => {
@@ -81,8 +81,7 @@ const ProductDetail = () => {
   if (!product) {
     return <div>Loading...</div>;
   }
-  console.log(product.flashsale.length == 0)
-  const rating = 4.5; // Rating produk
+  const rating = product.rating ? product.rating : 0;
   return (
     <div className="bg-white text-gray-800">
       <Header />
@@ -119,8 +118,14 @@ const ProductDetail = () => {
                   return <i key={index} className={`${starClass} fa-star text-xl`}></i>;
                 })}
 
+                {/* loop empty rating */}
+                {[...Array(5 - Math.floor(rating))].map((_, index) => {
+                  const starClass = index < rating ? "fas" : "fas";
+                  return <i key={index} className={`${starClass} fa-star text-gray-200 text-xl`}></i>;
+                })}
+
               </div>
-              <span className="ml-2">(90 Review)</span>
+              <span className="ml-2">({product.count_sold} Review)</span>
             </div>
             <div className="product-details">
               <div>
@@ -140,19 +145,31 @@ const ProductDetail = () => {
               </div>
             </div>
             <div className="mt-4 text-red-600 text-xl font-bold">
-            <span>
+            <div className="flex items-center">
               Rp.{" "}
               {product.flashsale.length >= 1
                 ? product.flashsale[0].flash_price.toLocaleString() 
                 : product.price.toLocaleString()}
               
               {/* Jika ada flash sale, tampilkan harga diskon dengan coretan */}
-              {product.flashsale && (
+              {product.flashsale.length >= 1 && (
+                // badge flash sale
+                <div className="d-flex">
+                  <span className="text-sm line-through text-gray-500 ml-2">
+                    Rp. {product.price.toLocaleString()}
+                  </span>
+                  <span className="bg-red-600 text-white px-2 py-1 rounded-md text-sm ml-2">
+                    Flash Sale
+                  </span>
+                </div>
+              )}
+
+              {product.flashsale.length == 0 && (
                 <span className="text-sm line-through text-gray-500 ml-2">
-                  Rp. {product.price.toLocaleString()}
+                  Rp. {product.strikeout_price.toLocaleString()}
                 </span>
               )}
-            </span>
+            </div>
 
             </div>
             <div className="flex items-center mt-4 space-x-2">
@@ -313,7 +330,7 @@ const ProductDetail = () => {
                     alt={product.name}
                     title={product.name}
                     price={"Rp. " + product.price.toLocaleString() || 0}
-                    rating={4.5} // Assuming count_sold as a placeholder for rating
+                    rating={product.rating || 0}
                     isNew={isNew(product.createdAt)}
                   />
                 ))}
