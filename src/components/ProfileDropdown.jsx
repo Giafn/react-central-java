@@ -5,6 +5,7 @@ const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const profileIconRef = useRef(null);
+  const hasToken = localStorage.getItem("token") ? true : false;
 
   const toggleDropdown = (event) => {
     event.stopPropagation();
@@ -36,7 +37,7 @@ const ProfileDropdown = () => {
       <button ref={profileIconRef} className="profile-icon text-white text-3xl p-2" onClick={toggleDropdown}>
         <i className={`fas fa-user-circle ${isOpen ? "text-white" : "text-white"}`}></i>
       </button>
-      {isOpen && (
+      {(isOpen && hasToken) && (
         <div className="profil-dropdown-content absolute bg-[#F7CDCF] rounded-lg shadow-md mt-1 w-40 text-left right-1">
           {" "}
           <Link to="/profile" className="block w-full px-4 py-2 text-left text-black hover:bg-gray-100">
@@ -51,6 +52,16 @@ const ProfileDropdown = () => {
           >
             Keluar
           </button>
+        </div>
+      )}
+      {(isOpen && !hasToken) && (
+        <div className="profil-dropdown-content absolute bg-[#F7CDCF] rounded-lg shadow-md mt-1 w-40 text-left right-1">
+          <Link to="/login" className="block w-full px-4 py-2 text-left text-black hover:bg-gray-100">
+            Masuk
+          </Link>
+          <Link to="/register" className="block w-full px-4 py-2 text-left text-black hover:bg-gray-100">
+            Daftar
+          </Link>
         </div>
       )}
     </div>

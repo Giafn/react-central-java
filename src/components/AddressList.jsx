@@ -57,6 +57,7 @@ const AddressList = () => {
       setAddresses([...addresses, newAddressWithEditing]);
       setNewAddress({ name: '', receiver: '', phone: '', address: '' });
       setIsAdding(false);
+      fetchAddresses();
     } catch (error) {
       console.error('Failed to add address:', error);
     }

@@ -62,10 +62,16 @@ const App = () => {
             <Register />
           </GuestRoute>
         } />
+        
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verification-code" element={<VerificationCode />} />
         <Route path="/new-password" element={<NewPassword />} />
-        <Route path="/profile" element={<Profile />} />
+
+        <Route path="/profile" element={
+          <PrivateRoute admin={false}>
+            <Profile />
+          </PrivateRoute>
+        } />
         {/* <Route path="/loyalitas" element={<Loyalitas />} /> */}
         <Route path="/keranjang" element={
           <PrivateRoute admin={false}>
@@ -268,9 +274,21 @@ const App = () => {
             </PrivateRoute>
           }
         />
-        <Route path="/admin/kerajinan/:id" element={<AKerajinanDetail />} />
-        <Route path="/produk/:id" element={<AProductDetail />} />
-        <Route path="/produk/:id/edit" element={<EditProduk />} />
+        <Route path="/admin/kerajinan/:id" element={
+          <PrivateRoute admin={true}>
+            <AKerajinanDetail />
+          </PrivateRoute>
+        } />
+        <Route path="/produk/:id" element={
+          <PrivateRoute admin={true}>
+            <AProductDetail />
+          </PrivateRoute>
+        } />
+        <Route path="/produk/:id/edit" element={
+          <PrivateRoute admin={true}>
+            <EditProduk />
+          </PrivateRoute>
+        } />
         <Route
           path="/admin/pakaian/:id"
           element={
