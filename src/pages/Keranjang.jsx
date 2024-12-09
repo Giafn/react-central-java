@@ -1,14 +1,42 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { cartData } from "../services/KeranjangServices";
 
 const Keranjang = () => {
-  const [cartItems, setCartItems] = useState(cartData);
+  const [cartItems, setCartItems] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const navigate = useNavigate();
+
+  // Fungsi untuk memfetch data cart
+  useEffect(() => {
+    const fetchCartData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get("http://localhost:3000/api/cart", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const cartData = response.data.data.cartItems.map((cartItem) => ({
+          id: cartItem.item.name, // Gunakan nama sebagai ID unik
+          name: cartItem.item.name,
+          price: cartItem.item.price,
+          quantity: cartItem.qty,
+          image: `http://localhost:3000/${cartItem.item.images[0]?.url}`,
+        }));
+
+        setCartItems(cartData);
+      } catch (error) {
+        console.error("Error fetching cart data:", error);
+      }
+    };
+
+    fetchCartData();
+  }, []);
 
   const toggleSelectAll = () => {
     if (selectAll) {
@@ -50,7 +78,7 @@ const Keranjang = () => {
         selectedItems.includes(item.id)
       );
       navigate("/pengiriman", {
-        state: { selectedProducts, totalBelanja: totalPrice }, 
+        state: { selectedProducts, totalBelanja: totalPrice },
       });
     } else {
       alert("Pilih item terlebih dahulu!");
@@ -82,7 +110,6 @@ const Keranjang = () => {
                       <div className="flex justify-between items-center">
                         <div>
                           <h3 className="font-bold">{item.name}</h3>
-                          <p className="text-gray-500">{item.details}</p>
                         </div>
                         <div className="flex flex-col items-end space-y-2">
                           <input
