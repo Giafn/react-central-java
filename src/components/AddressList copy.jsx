@@ -16,23 +16,19 @@ const AddressList = () => {
 
   // Fetch all addresses
   useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const response = await axios.get(apiUrl, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAddresses(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch addresses:', error);
+      }
+    };
+
     fetchAddresses();
   }, [token]);
-
-  const fetchAddresses = async () => {
-    try {
-      const response = await axios.get(apiUrl, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const addressesWithEditing = response.data.data.map((addr) => ({
-        ...addr,
-        isEditing: false,
-      }));
-      setAddresses(addressesWithEditing);
-    } catch (error) {
-      console.error('Failed to fetch addresses:', error);
-    }
-  };
 
   // Add new address
   const handleAddAddress = async () => {
@@ -40,21 +36,18 @@ const AddressList = () => {
       alert('Maksimal 5 alamat diperbolehkan.');
       return;
     }
+
     try {
-      const response = await axios.post(
-        apiUrl,
-        {
-          nama_alamat: newAddress.name,
-          alamat: newAddress.address,
-          no_telpon: newAddress.phone,
-          penerima: newAddress.receiver,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const newAddressWithEditing = { ...response.data.data, isEditing: false };
-      setAddresses([...addresses, newAddressWithEditing]);
+      const response = await axios.post(apiUrl, {
+        nama_alamat: newAddress.name,
+        alamat: newAddress.address,
+        no_telpon: newAddress.phone,
+        penerima: newAddress.receiver,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setAddresses([...addresses, response.data.data]);
       setNewAddress({ name: '', receiver: '', phone: '', address: '' });
       setIsAdding(false);
     } catch (error) {
@@ -66,34 +59,25 @@ const AddressList = () => {
   const handleSaveAddress = async (id) => {
     const updatedAddress = addresses.find((addr) => addr.id === id);
     try {
-      await axios.patch(
-        `${apiUrl}/${id}`,
-        {
-          nama_alamat: updatedAddress.address_name,
-          alamat: updatedAddress.address,
-          no_telpon: updatedAddress.phone_number,
-          penerima: updatedAddress.recipient,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await axios.patch(`${apiUrl}/${id}`, {
+        nama_alamat: updatedAddress.name,
+        alamat: updatedAddress.address,
+        no_telpon: updatedAddress.phone,
+        penerima: updatedAddress.receiver,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       setAddresses(
-        addresses.map((addr) =>
-          addr.id === id ? { ...addr, isEditing: false } : addr
-        )
+        addresses.map((addr) => (addr.id === id ? { ...addr, isEditing: false } : addr))
       );
     } catch (error) {
-      alert(error.response.data.message);
       console.error('Failed to update address:', error);
     }
   };
 
   // Delete address
   const handleDeleteAddress = async (id) => {
-    const confirmed = window.confirm('Apakah Anda yakin ingin menghapus alamat ini?');
-    if (!confirmed) return;
-
     try {
       await axios.delete(`${apiUrl}/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -125,11 +109,11 @@ const AddressList = () => {
                 <input
                   type="text"
                   className="w-full px-4 py-2 border rounded"
-                  value={address.address_name}
+                  value={address.name}
                   onChange={(e) =>
                     setAddresses(
                       addresses.map((addr) =>
-                        addr.id === address.id ? { ...addr, address_name: e.target.value } : addr
+                        addr.id === address.id ? { ...addr, name: e.target.value } : addr
                       )
                     )
                   }
@@ -140,11 +124,11 @@ const AddressList = () => {
                 <input
                   type="text"
                   className="w-full px-4 py-2 border rounded"
-                  value={address.recipient}
+                  value={address.receiver}
                   onChange={(e) =>
                     setAddresses(
                       addresses.map((addr) =>
-                        addr.id === address.id ? { ...addr, recipient: e.target.value } : addr
+                        addr.id === address.id ? { ...addr, receiver: e.target.value } : addr
                       )
                     )
                   }
@@ -155,11 +139,11 @@ const AddressList = () => {
                 <input
                   type="text"
                   className="w-full px-4 py-2 border rounded"
-                  value={address.phone_number}
+                  value={address.phone}
                   onChange={(e) =>
                     setAddresses(
                       addresses.map((addr) =>
-                        addr.id === address.id ? { ...addr, phone_number: e.target.value } : addr
+                        addr.id === address.id ? { ...addr, phone: e.target.value } : addr
                       )
                     )
                   }
@@ -197,9 +181,9 @@ const AddressList = () => {
             </div>
           ) : (
             <div>
-              <div className="font-bold">{address.address_name}</div>
-              <div>{address.recipient}</div>
-              <div>{address.phone_number}</div>
+              <div className="font-bold">{address.name}</div>
+              <div>{address.receiver}</div>
+              <div>{address.phone}</div>
               <div>{address.address}</div>
               <div className="flex space-x-2 mt-2">
                 <button
