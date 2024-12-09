@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import Footer from "../components/Footer";
 import HeaderLogo from "../components/HeaderLogo";
 
@@ -7,33 +8,48 @@ const Pengiriman = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { selectedProducts = [], totalBelanja = 0 } = location.state || {};
-  const [shippingOption, setShippingOption] = useState("");
-  const [address, setAddress] = useState("Jl. Diponegoro no.99, Surabaya, Jawa Timur");
 
-  const handleShippingChange = (value) => {
-    setShippingOption(value);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [shippingOption, setShippingOption] = useState("");
+
+  const fetchAddresses = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:3000/api/addresses", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setAddresses(response.data.data);
+      if (response.data.data.length > 0) {
+        setSelectedAddressId(response.data.data[0].id); // Pilih alamat pertama secara default
+      }
+    } catch (error) {
+      console.error("Error fetching addresses:", error);
+    }
   };
 
-  const handleAddressChange = () => {
-    const newAddress = prompt("Masukkan alamat baru:", address);
-    if (newAddress && newAddress.trim() !== "") {
-      setAddress(newAddress);
-    } else {
-      alert("Alamat tidak boleh kosong!");
-    }
+  useEffect(() => {
+    fetchAddresses();
+  }, []);
+
+  const handleAddressChange = (e) => {
+    setSelectedAddressId(parseInt(e.target.value));
   };
 
   const handleNext = () => {
-    if (!shippingOption) {
-      alert("Pilih metode pengiriman terlebih dahulu!");
+    if (!shippingOption || !selectedAddressId) {
+      alert("Pilih alamat dan metode pengiriman terlebih dahulu!");
       return;
     }
+    const selectedAddress = addresses.find((address) => address.id === selectedAddressId);
     navigate("/pembayaran", {
       state: {
         selectedProducts,
         totalBelanja,
         shippingOption,
-        address,
+        address: selectedAddress,
       },
     });
   };
@@ -56,18 +72,35 @@ const Pengiriman = () => {
   const totalToPay = totalBelanja + shippingCost + 1000;
 
   return (
-    <div className="flex flex-col min-h-screen bg-whte">
+    <div className="flex flex-col min-h-screen bg-white">
       <HeaderLogo />
       <main className="container mx-auto mt-24 flex-grow">
         <h2 className="text-xl font-bold mb-4">Detail Pengiriman</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="col-span-2">
             <div className="bg-white p-4 rounded shadow mb-4">
-              <h3 className="font-bold mb-2">Alamat Pengiriman</h3>
-              <p>{address}</p>
-              <button className="bg-[#C62E2E] text-white px-4 py-2 mt-2 rounded" onClick={handleAddressChange}>
-                Ubah Alamat
-              </button>
+              <h3 className="font-bold mb-2">Pilih Alamat Pengiriman</h3>
+              <select
+                className="w-full border border-gray-300 rounded p-2"
+                value={selectedAddressId || ""}
+                onChange={handleAddressChange}
+              >
+                {addresses.map((address) => (
+                  <option key={address.id} value={address.id}>
+                    {address.address_name} - {address.recipient}
+                  </option>
+                ))}
+              </select>
+              {selectedAddressId && (
+                <div className="mt-4">
+                  <p>
+                    <strong>Alamat:</strong> {addresses.find((a) => a.id === selectedAddressId)?.address}
+                  </p>
+                  <p>
+                    <strong>No. Telepon:</strong> {addresses.find((a) => a.id === selectedAddressId)?.phone_number}
+                  </p>
+                </div>
+              )}
             </div>
             <div className="bg-white p-4 rounded shadow mb-4 mt-8">
               <h3 className="font-bold mb-2">Daftar Barang</h3>
@@ -87,7 +120,11 @@ const Pengiriman = () => {
               <label className="block mb-2 font-bold" htmlFor="shipping">
                 Pilih Metode Pengiriman
               </label>
-              <select className="w-full border border-gray-300 rounded p-2 " value={shippingOption} onChange={(e) => handleShippingChange(e.target.value)}>
+              <select
+                className="w-full border border-gray-300 rounded p-2"
+                value={shippingOption}
+                onChange={(e) => setShippingOption(e.target.value)}
+              >
                 <option value="" disabled>
                   Pilih Pengiriman
                 </option>
@@ -105,7 +142,13 @@ const Pengiriman = () => {
               <p>
                 Total yang harus dibayar: <span className="font-bold">Rp. {totalToPay.toLocaleString()}</span>
               </p>
-              <button className={`w-full mt-4 ${shippingOption ? "bg-[#C62E2E] text-white" : "bg-red-300 text-white cursor-not-allowed"} py-2 rounded`} disabled={!shippingOption} onClick={handleNext}>
+              <button
+                className={`w-full mt-4 ${
+                  shippingOption ? "bg-[#C62E2E] text-white" : "bg-red-300 text-white cursor-not-allowed"
+                } py-2 rounded`}
+                disabled={!shippingOption}
+                onClick={handleNext}
+              >
                 Bayar Sekarang
               </button>
             </div>
