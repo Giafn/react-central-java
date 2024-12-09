@@ -147,7 +147,7 @@ const ProductDetail = () => {
                 })}
 
               </div>
-              <span className="ml-2">({product.count_sold} Review)</span>
+              <span className="ml-2">({product.count_sold} Terjual)</span>
             </div>
             <div className="product-details">
               <div>

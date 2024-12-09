@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Modal from "../components/Modal";
 import Footer from "../components/Footer";
 import HeaderLogo from "../components/HeaderLogo";
+import axios from "axios"; // Add axios for making API requests
 
 const Pembayaran = () => {
   const location = useLocation();
@@ -13,8 +14,10 @@ const Pembayaran = () => {
   const [timer, setTimer] = useState(15 * 60); 
   const [voucherCode, setVoucherCode] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [qrUrl, setQrUrl] = useState(""); // State to hold QR URL
+  const [transactionId, setTransactionId] = useState(null); // State for storing transaction ID
 
-  const { totalBelanja = 0, selectedProducts = [] } = location.state || {};
+  const { totalBelanja = 0, selectedProducts = [], address } = location.state || {};
 
   const biayaOngkosKirim = 20000;
   const biayaAdmin = 1000;
@@ -76,22 +79,58 @@ const Pembayaran = () => {
     }
   }, [isPaymentStarted]);
 
-  const handleStartPayment = () => {
-    setIsPaymentStarted(true);
+  const handleStartPayment = async () => {
+    try {
+
+      const addresString = `${address.address}, ${address.address_name}, ${address.recipient}, ${address.phone_number}`;
+      const requestData = {
+        address: addresString,
+        total_amount: totalYangHarusDibayarkan.toString(), 
+        items: selectedProducts.map(item => ({
+          items_id: item.id, 
+          qty: item.quantity, 
+          amount: item.price * item.quantity
+        })),
+      };
+      const token = localStorage.getItem("token");
+      const response = await axios.post("http://localhost:3000/api/transactions/", requestData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.data.status === "success") {
+        setQrUrl(response.data.data.qr_url);
+        setTransactionId(response.data.data.transaction_id); // Save the transaction ID
+        setIsPaymentStarted(true);
+      } else {
+        alert("Gagal membuat transaksi!");
+      }
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      alert("Terjadi kesalahan, coba lagi.");
+    }
   };
 
-  const handleCheckStatus = () => {
-    setIsPaymentStarted(false);
-    setIsPaid(true);
-
-    const processedItems = selectedProducts.map((item) => ({
-      ...item,
-      status: "Sedang diproses",
-    }));
-
-    const existingTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
-    const updatedTransactions = [...existingTransactions, ...processedItems];
-    localStorage.setItem("transactions", JSON.stringify(updatedTransactions));
+  const handleCheckStatus = async () => {
+    console.log(transactionId);
+    if (transactionId) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`http://localhost:3000/api/transactions/check/${transactionId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.data.status === "success" && response.data.data.payment_status === "settlement") {
+          setIsPaid(true);
+        } else {
+          alert("Pembayaran belum berhasil, coba lagi nanti.");
+        }
+      } catch (error) {
+        console.error("Error checking payment status:", error);
+        alert("Terjadi kesalahan saat mengecek status pembayaran.");
+      }
+    }
   };
 
   const handleNavigateToTransactions = () => {
@@ -174,11 +213,7 @@ const Pembayaran = () => {
                 <p className="text-sm text-green-600 bg-green-100 p-2 rounded mt-2">
                   Selesaikan pembayaran dalam {formatTimer()}
                 </p>
-                <img
-                  src="/assets/images/K_QR.jpg"
-                  alt="QR Code"
-                  className="w-48 h-48 mx-auto mt-4"
-                />
+                {qrUrl && <img src={qrUrl} alt="QR Code" className="w-48 h-48 mx-auto mt-4" />}
                 <p className="text-lg font-semibold mt-4">Total Pembayaran</p>
                 <p className="text-xl font-bold">Rp. {totalYangHarusDibayarkan.toLocaleString()}</p>
                 <button

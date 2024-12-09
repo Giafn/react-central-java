@@ -4,6 +4,9 @@ import AdminHeader from "../components/AdminHeader";
 import AdminFooter from "../components/AdminFooter";
 import Sidebar from "../components/Sidebar";
 
+// Import axios
+import axios from "axios";
+
 const EditProduk = () => {
   const { id } = useParams(); // Get the product id from the URL
   const [formData, setFormData] = useState({
@@ -108,7 +111,7 @@ const EditProduk = () => {
 
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Anda harus login terlebih dahulu.");
+      navigate("/login");
       return;
     }
 
@@ -135,23 +138,20 @@ const EditProduk = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/items/${id}`, {
-        method: "PUT", // Use PUT for updating a product
+      const response = await axios.put(`http://localhost:3000/api/items/${id}`, formDataObj, {
         headers: {
           Authorization: `Bearer ${token}`, // Do not set Content-Type, it will be set by FormData
         },
-        body: formDataObj,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Terjadi kesalahan.");
-      }
 
       alert("Produk berhasil diperbarui!");
     } catch (error) {
-      console.error("Error:", error.message);
       alert(`Gagal memperbarui produk: ${error.message}`);
+      if (error.response.status === 401 || error.response.status === 403) {
+        alert("Sesi Anda telah berakhir. Silakan login kembali.");
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
     }
   };
 
