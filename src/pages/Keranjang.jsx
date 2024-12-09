@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
@@ -8,6 +8,7 @@ const Keranjang = () => {
   const [cartItems, setCartItems] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [debouncedQuantity, setDebouncedQuantity] = useState({});
   const navigate = useNavigate();
 
   // Fungsi untuk memfetch data cart
@@ -21,8 +22,8 @@ const Keranjang = () => {
           },
         });
 
-        const cartData = response.data.data.cartItems.map((cartItem) => ({
-          id: cartItem.item.name, // Gunakan nama sebagai ID unik
+        const cartData = response.data.data.cart.cartItems.map((cartItem) => ({
+          id: cartItem.id, // Gunakan ID unik
           name: cartItem.item.name,
           price: cartItem.item.price,
           quantity: cartItem.qty,
@@ -38,6 +39,56 @@ const Keranjang = () => {
     fetchCartData();
   }, []);
 
+  // Fungsi untuk mengupdate quantity di server dengan debounce
+  const updateQuantity = async (id, quantity) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.patch(
+        "http://localhost:3000/api/cart/update",
+        {
+          qty: quantity,
+          cartItemId: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error updating cart item quantity:", error);
+    }
+  };
+
+  // Fungsi untuk menunda request update quantity
+  const handleQuantityChange = (id, delta) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, quantity: item.quantity + delta } : item
+      )
+    );
+
+    // Jika quantity sudah ada di debouncedQuantity, clear timeout lama dan atur timeout baru
+    if (debouncedQuantity[id]) {
+      clearTimeout(debouncedQuantity[id]);
+    }
+
+    // Menunggu 2 detik sebelum melakukan update ke server
+    const timeoutId = setTimeout(() => {
+      const updatedItem = cartItems.find((item) => item.id === id);
+      if (updatedItem) {
+        const newQuantity = updatedItem.quantity + delta;
+        updateQuantity(id, newQuantity);
+      }
+    }, 500); // Jeda 2 detik
+
+    // Set debounced timeout ID untuk id cartItem
+    setDebouncedQuantity((prev) => ({
+      ...prev,
+      [id]: timeoutId,
+    }));
+  };
+
   const toggleSelectAll = () => {
     if (selectAll) {
       setSelectedItems([]);
@@ -45,14 +96,6 @@ const Keranjang = () => {
       setSelectedItems(cartItems.map((item) => item.id));
     }
     setSelectAll(!selectAll);
-  };
-
-  const handleQuantityChange = (id, delta) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + delta } : item
-      )
-    );
   };
 
   const handleDeleteItem = (id) => {
