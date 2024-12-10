@@ -133,7 +133,7 @@ const Pembayaran = () => {
   // Updated applyVoucher function with API request
   const applyVoucher = async () => {
     try {
-      // Make API call to check the voucher
+      // Panggil API untuk memverifikasi voucher
       const token = localStorage.getItem("token");
       const response = await axios.post(
         "http://localhost:3000/api/vouchers/check",
@@ -144,47 +144,45 @@ const Pembayaran = () => {
           },
         }
       );
-
-      // Handle the API response
+  
       if (response.data.status === "success") {
         const voucherData = response.data.data;
+  
         if (totalBelanja >= voucherData.min_expense) {
           let calculatedDiscount = 0;
-
-          // Check the type of discount and apply accordingly
+  
+          // Terapkan diskon sesuai tipe
           if (voucherData.disc_type === "persen") {
-            // Apply percentage discount
             calculatedDiscount = (totalBelanja * voucherData.disc) / 100;
           } else if (voucherData.disc_type === "nominal") {
-            // Apply nominal discount
             calculatedDiscount = voucherData.disc;
           } else if (voucherData.disc_type === "ongkir") {
-            // Apply discount to shipping cost only
             calculatedDiscount = Math.min(voucherData.disc, biayaOngkosKirim);
           }
-
-          // ubah state voucherId
-          setVoucherId(voucherData.id);
-
-          // Apply the discount, ensuring it doesn't exceed the maximum limit
-          setDiscount(Math.min(calculatedDiscount, voucherData.disc));
+  
+          // Pastikan diskon tidak melebihi batas maksimum
+          const finalDiscount = Math.min(calculatedDiscount, voucherData.disc);
+          setDiscount(finalDiscount); // Perbarui state diskon
+          setVoucherId(voucherData.id); // Simpan ID voucher
+  
           alert("Voucher berhasil diterapkan!");
         } else {
           alert(
             `Voucher ini memerlukan minimal belanja Rp. ${voucherData.min_expense.toLocaleString()}`
           );
-          setDiscount(0);
+          setDiscount(0); // Reset diskon jika tidak memenuhi syarat
         }
       } else {
         alert("Voucher tidak valid atau gagal memverifikasi.");
-        setDiscount(0);
+        setDiscount(0); // Reset diskon jika tidak valid
       }
     } catch (error) {
       console.error("Error checking voucher:", error);
       alert(error.response?.data?.message || "Terjadi kesalahan saat memverifikasi voucher.");
-      setDiscount(0);
+      setDiscount(0); // Reset diskon jika terjadi kesalahan
     }
   };
+  
 
   return (
     <div className="bg-white min-h-screen flex flex-col">

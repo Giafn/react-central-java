@@ -112,7 +112,7 @@ const Terpopular = () => {
                 alt={product.name}
                 title={product.name}
                 price={"Rp. " + formatPrice(product.price)}
-                rating={product.rating || 4.5} // Placeholder untuk rating
+                rating={product.rating} // Placeholder untuk rating
               />
             ))}
           </div>

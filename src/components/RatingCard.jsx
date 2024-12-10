@@ -7,10 +7,9 @@ const RatingCard = ({ review }) => {
           <h4 className="font-semibold text-lg">{review.name}</h4>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <i className="fas fa-star text-yellow-400 mr-1"></i>
-              <i className="fas fa-star text-yellow-400 mr-1"></i>
-              <i className="fas fa-star text-yellow-400 mr-1"></i>
-              <i className="fas fa-star text-yellow-400 mr-1"></i>
+              {[...Array(review.rating)].map((_, index) => (
+                <i key={index} className="fas fa-star text-yellow-400"></i>
+              ))}
             </div>
             <span className="font-medium">{review.rating}</span>
           </div>

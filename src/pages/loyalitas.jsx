@@ -30,7 +30,14 @@ const Loyalitas = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-        setVouchers(response.data.data);
+
+        // Tambahkan properti `claimed` secara lokal
+        const vouchersWithClaimed = response.data.data.map((voucher) => ({
+          ...voucher,
+          claimed: false, // Default belum diklaim
+        }));
+
+        setVouchers(vouchersWithClaimed);
       } catch (error) {
         console.error("Error fetching vouchers:", error);
         alert("Gagal memuat voucher. Silakan coba lagi.");
@@ -42,13 +49,12 @@ const Loyalitas = () => {
   }, []);
 
   const showCode = (voucherId) => {
-    const availableVoucher = vouchers.find((voucher) => voucher.id === voucherId && voucher.remaining > 0);
-    if (availableVoucher) {
-      alert(`Voucher code: ${availableVoucher.code}`);
-      // Update button state here if needed
-    } else {
-      alert("Voucher tidak tersedia atau sudah habis.");
-    }
+    // Tandai voucher sebagai diklaim
+    setVouchers((prevVouchers) =>
+      prevVouchers.map((voucher) =>
+        voucher.id === voucherId ? { ...voucher, claimed: true } : voucher
+      )
+    );
   };
 
   const copyToClipboard = (voucherCode) => {
@@ -95,21 +101,24 @@ const Loyalitas = () => {
           </div>
 
           <div className="flex-1 overflow-x-auto flex space-x-4 py-4 lg:py-0">
-            {vouchers.map((voucher) => (
-              <div
-                key={voucher.id}
-                className="p-6 rounded-lg flex flex-col justify-between items-center text-center flex-shrink-0"
-                style={{
-                  width: "300px",
-                  height: "200px",
-                  backgroundColor: "#F7CDCF",
-                }}
-              >
-                <h2 className="text-lg font-bold">{voucher.name}</h2>
-                <p className="text-sm">Voucher Code: {voucher.code}</p>
-                <p className="text-sm">
-                  Minimal belanja Rp. {voucher.min_expense.toLocaleString("id-ID")}
-                </p>
+          {vouchers.map((voucher) => (
+            <div
+              key={voucher.id}
+              className="p-6 rounded-lg flex flex-col justify-between items-center text-center flex-shrink-0"
+              style={{
+                width: "300px",
+                height: "200px",
+                backgroundColor: "#F7CDCF",
+              }}
+            >
+              <h2 className="text-lg font-bold">
+                Klaim Voucher <p>{voucher.name}</p>
+              </h2>
+              <p className="text-sm">
+                Minimal belanja Rp. {voucher.min_expense.toLocaleString("id-ID")}
+              </p>
+              {!voucher.claimed ? (
+                // Jika belum diklaim, tampilkan tombol Klaim
                 <button
                   className="text-sm px-4 py-2 rounded mt-2"
                   style={{
@@ -122,19 +131,20 @@ const Loyalitas = () => {
                 >
                   Klaim
                 </button>
-
-                {voucher.remaining <= 0 ? (
-                  <p className="text-sm text-red-500">Voucher habis</p>
-                ) : (
+              ) : (
+                // Jika sudah diklaim, tampilkan kode voucher dan tombol Salin Kode
+                <>
+                  <p className="text-sm font-bold mt-2">{voucher.code}</p>
                   <button
                     onClick={() => copyToClipboard(voucher.code)}
                     className="mt-2 text-sm text-black underline"
                   >
                     Salin Kode
                   </button>
-                )}
-              </div>
-            ))}
+                </>
+              )}
+            </div>
+          ))}
           </div>
         </div>
 
