@@ -55,14 +55,6 @@ const AdminHeader = () => {
       </div>
 
       <div className={`flex items-center space-x-4 ${isMobileMenuOpen ? 'flex-col absolute mt-6 bg-[#C62E2E] pt-6 w-full top-16 left-0 py-4' : 'hidden lg:flex'}`}>
-        <div className="relative w-80">
-          <input
-            type="text"
-            placeholder="Cari Produk..."
-            className="pl-10 pr-4 py-2 rounded-[15px] focus:outline-none text-black w-full border border-gray-300"
-          />
-          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-        </div>
 
         <div className="relative" ref={dropdownRef}>
           <button

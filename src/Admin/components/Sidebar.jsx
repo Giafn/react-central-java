@@ -17,7 +17,7 @@ const Sidebar = () => {
                 Riwayat Pesanan
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link to="/admin/proses-pesanan" className={`${isActive('/admin/proses-pesanan')} hover:text-black`}>
                 Pesanan dalam proses
               </Link>
@@ -36,7 +36,7 @@ const Sidebar = () => {
               <Link to="/admin/return-pesanan" className={`${isActive('/admin/return-pesanan')} hover:text-black`}>
                 Pengembalian produk
               </Link>
-            </li>
+            </li> */}
           </ul>
         </div>
         <div className="bg-[#F7CDCF] p-4 shadow">
@@ -79,7 +79,7 @@ const Sidebar = () => {
             </li>
           </ul>
         </div>
-        <div className="bg-[#F7CDCF] p-4 shadow">
+        {/* <div className="bg-[#F7CDCF] p-4 shadow">
           <h3 className="font-bold text-black border-b border-[#C62E2E] pb-2">ULASAN PELANGGAN</h3>
           <ul className="mt-2 space-y-2">
             <li>
@@ -88,7 +88,7 @@ const Sidebar = () => {
               </Link>
             </li>
           </ul>
-        </div>
+        </div> */}
       </div>
     </div>
   );

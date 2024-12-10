@@ -88,17 +88,16 @@ const Login = () => {
               </button>
             </form>
 
-            <div className="mt-6 text-sm">atau masuk dengan</div>
+            {/* <div className="mt-6 text-sm">atau masuk dengan</div>
             <div className="flex items-center mt-6">
               <span className="flex-grow h-[1px] bg-black"></span>
-              {/* Google Login Button */}
               <div 
                 className="mx-4 cursor-pointer" 
                 onClick={() => window.location.href = "http://localhost:3000/api/auth/google"}>
                 <img src="/assets/images/google-icon.png" alt="Google" className="w-8 h-8"/>
               </div>
               <span className="flex-grow h-[1px] bg-black"></span>
-            </div>
+            </div> */}
           </div>
 
           <div className="text-center">

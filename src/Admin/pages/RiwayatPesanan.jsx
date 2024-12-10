@@ -1,37 +1,62 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminHeader from "../components/AdminHeader";
 import AdminFooter from "../components/AdminFooter";
 import Sidebar from "../components/Sidebar";
-import riwayatData from "../services/RiwayatData";
 import TopCard from "../components/TopCard";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import axios from "axios";
 
 const RiwayatPesanan = () => {
   const navigate = useNavigate();
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [statusCount, setStatusCount] = useState({});
+  const [totalPenjualan, setTotalPenjualan] = useState(0);
 
-  const totalPenjualan = riwayatData.filter(data => data.status === "Selesai").reduce((acc, curr) => acc + curr.jumlah, 0);
-  const pesananProses = riwayatData.filter(data => data.status === "Proses").length;
-  const pesananSelesai = riwayatData.filter(data => data.status === "Selesai").length;
-  const pesananDibatalkan = riwayatData.filter(data => data.status === "Dibatalkan").length;
+  // Fungsi untuk mengambil data transaksi dari API
+  const fetchTransactions = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/transactions/admin", {
+        params: {
+          start_date: startDate ? startDate.toISOString().split('T')[0] : '',
+          end_date: endDate ? endDate.toISOString().split('T')[0] : ''
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+      
+      if (response.data.status === "success") {
+        setTransactions(response.data.data.transactions);
+        setStatusCount(response.data.data.status_count);
+        setTotalPenjualan(response.data.data.total);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
+  // Mengambil data ketika startDate atau endDate berubah
+  useEffect(() => {
+    fetchTransactions();
+  }, [startDate, endDate]);
+
+  // Menghitung total penjualan, pesanan yang diproses, selesai, dan dibatalkan
+  const pesananProses = statusCount["on process"] || 0;
+  const pesananSelesai = statusCount["selesai"] || 0;
+  const pesananDibatalkan = statusCount["batal"] || 0;
+  const pesananKembali = statusCount["di kembalikan"] || 0;
 
   const cardData = [
-    { title: "Total Penjualan", value: `Rp ${totalPenjualan.toLocaleString()}`, date: "Oktober 2024" },
-    { title: "Pesanan Dalam Proses", value: pesananProses, date: "Oktober 2024" },
-    { title: "Pesanan Selesai", value: pesananSelesai, date: "Oktober 2024" },
-    { title: "Pesanan Dibatalkan", value: pesananDibatalkan, date: "Oktober 2024" }
+    { title: "Total Penjualan", value: `Rp ${totalPenjualan.toLocaleString()}` },
+    { title: "Pesanan Dalam Proses", value: pesananProses },
+    { title: "Pesanan Selesai", value: pesananSelesai },
+    { title: "Pesanan Dibatalkan", value: pesananDibatalkan },
+    { title: "Pesanan Dikembalikan", value: pesananKembali }
   ];
-
-  const filteredData = riwayatData.filter((data) => {
-    const dataDate = new Date(data.tanggal);
-    if (startDate && endDate) {
-      return dataDate >= startDate && dataDate <= endDate;
-    }
-    return true;
-  });
 
   const handleUserClick = (customerId) => {
     navigate(`/admin/detail-pembeli/${customerId}`);
@@ -67,18 +92,23 @@ const RiwayatPesanan = () => {
                   dateFormat="dd/MM/yyyy"
                   className="px-4 py-2 border rounded-md"
                 />
+                <button
+                  onClick={fetchTransactions}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                >
+                  Submit
+                </button>
               </div>
             </div>
 
             <div className="border-b mb-4"></div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
               {cardData.map((card, index) => (
                 <TopCard
                   key={index}
                   title={card.title}
                   value={card.value}
-                  date={card.date}
                 />
               ))}
             </div>
@@ -96,22 +126,22 @@ const RiwayatPesanan = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredData.map((data, index) => (
+                  {transactions.map((data, index) => (
                     <tr key={index}>
-                      <td className="border-b py-2 px-4">{data.produk}</td>
+                      <td className="border-b py-2 px-4">{data.item_name}</td>
                       <td
                         className="border-b py-2 px-4 text-blue-500 cursor-pointer"
-                        onClick={() => handleUserClick(data.idUser)} // Tambahkan link ke detail pembeli
+                        onClick={() => handleUserClick(data.transactionId)} // Tambahkan link ke detail pembeli
                       >
-                        {data.idPesanan}
+                        {data.orderID}
                       </td>
-                      <td className="border-b py-2 px-4">{data.tanggal}</td>
-                      <td className="border-b py-2 px-4">{data.namaUser}</td>
+                      <td className="border-b py-2 px-4">{new Date(data.date).toLocaleDateString()}</td>
+                      <td className="border-b py-2 px-4">{data.nama_user}</td>
                       <td
                         className={`border-b py-2 px-4 ${
-                          data.status === "Proses"
+                          data.status === "proses"
                             ? "text-yellow-500"
-                            : data.status === "Dibatalkan"
+                            : data.status === "dibatalkan"
                             ? "text-red-500"
                             : "text-green-500"
                         }`}
@@ -119,7 +149,7 @@ const RiwayatPesanan = () => {
                         {data.status}
                       </td>
                       <td className="border-b py-2 px-4 text-right">
-                        Rp {data.jumlah.toLocaleString()}
+                        Rp {data.total.toLocaleString()}
                       </td>
                     </tr>
                   ))}

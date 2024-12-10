@@ -132,7 +132,7 @@ const Register = () => {
             </button>
           </div>
 
-          <div className="text-center my-4">atau masuk dengan</div>
+          {/* <div className="text-center my-4">atau masuk dengan</div>
           <div className="flex items-center mt-4 justify-center">
             <span className="flex-grow h-[1px] bg-black" />
             <a
@@ -144,7 +144,7 @@ const Register = () => {
               <img src="/assets/images/google-icon.png" alt="Google" className="w-8 h-8" />
             </a>
             <span className="flex-grow h-[1px] bg-black" />
-          </div>
+          </div> */}
         </div>
 
         <div className="text-center">
