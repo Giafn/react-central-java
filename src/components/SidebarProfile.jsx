@@ -2,6 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const SidebarProfile = () => {
+  const profileData = JSON.parse(localStorage.getItem("profile"));
+  const firstLetter = profileData.name.charAt(0).toUpperCase();
   const navigate = useNavigate();
 
   const handleNavigateToTransactions = () => {
@@ -17,9 +19,9 @@ const SidebarProfile = () => {
       <div className="bg-[#C62E2E] text-white p-4 rounded-lg">
         <div className="flex items-center space-x-2">
           <div className="bg-white text-[#000000] rounded-full w-8 h-8 flex items-center justify-center">
-            J
+            {firstLetter}
           </div>
-          <span>Jihan Aprilia</span>
+          <span>{profileData.name}</span>
         </div>
       </div>
       <div

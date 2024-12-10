@@ -10,12 +10,7 @@ import KeamananProfile from "../components/KeamananProfile";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("profil");
-  const [editField, setEditField] = useState(null);
-  const [profileData, setProfileData] = useState({
-    name: "Jihan Aprilia",
-    email: "jihanl@gmail.com",
-    phone: "085765789099",
-  });
+  
 
   const [addresses, setAddresses] = useState([
     { id: 1, name: "Rumah Utama", receiver: "Jihan", phone: "08573613891", address: "Jl. Diponegoro no. 99", isEditing: false },
@@ -28,14 +23,6 @@ const Profile = () => {
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-  };
-
-  const handleEdit = (field) => {
-    setEditField(field);
-  };
-
-  const handleSaveChanges = () => {
-    setEditField(null);
   };
 
   const handleDeleteAddress = (id) => {
@@ -120,13 +107,7 @@ const Profile = () => {
               </div>
 
               {activeTab === "profil" && (
-                <ProfileDetails
-                  profileData={profileData}
-                  editField={editField}
-                  handleEdit={handleEdit}
-                  handleSaveChanges={handleSaveChanges}
-                  setProfileData={setProfileData}
-                />
+                <ProfileDetails/>
               )}
 
               {activeTab === "daftar-alamat" && (
