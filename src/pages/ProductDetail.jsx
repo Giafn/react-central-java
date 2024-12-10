@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom"; // Untuk mengambil params dari URL
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Card from "../components/KategoriCard";
+import ReviewItem from "../components/ReviewItem";
 
 const ProductDetail = () => {
   const { id } = useParams(); // Mengambil id produk dari URL
@@ -267,77 +268,9 @@ const ProductDetail = () => {
               </tr>
             </table>
           </div>
-
           <div id="penilaian" className={`tab-content mt-4 ${activeTab === "penilaian" ? "block" : "hidden"}`}>
-            <div className="mt-4 text-center">
-              <div className="flex items-center justify-center space-x-2">
-                <span className="text-red-600 text-xl font-bold">4.8 dari 5</span>
-                <button className="border border-red-600 text-red-600 px-2 py-1 rounded-md text-sm">Semua</button>
-                <button className="border border-red-600 text-red-600 px-2 py-1 rounded-md text-sm">Bintang 1 (2)</button>
-                <button className="border border-red-600 text-red-600 px-2 py-1 rounded-md text-sm">Bintang 2 (3)</button>
-                <button className="border border-red-600 text-red-600 px-2 py-1 rounded-md text-sm">Bintang 3 (5)</button>
-                <button className="border border-red-600 text-red-600 px-2 py-1 rounded-md text-sm">Bintang 4 (50)</button>
-                <button className="border border-red-600 text-red-600 px-2 py-1 rounded-md text-sm">Bintang 5 (75)</button>
-              </div>
-              <div className="flex items-center justify-center space-x-2 mt-2">
-                <button className="border border-red-600 text-red-600 px-2 py-1 rounded-md text-sm">Komentar (3)</button>
-                <button className="border border-red-600 text-red-600 px-2 py-1 rounded-md text-sm">Gambar (3)</button>
-              </div>
-            </div>
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="border border-red-600 p-4 rounded-md">
-                <div className="flex items-center">
-                  <img alt="Ayu Prameswari" className="w-12 h-12 rounded-full" height="50" src="https://storage.googleapis.com/a1aa/image/8fZmE5GGzYxdW6vBhHDEXAnv4t4upa7TFLToijKFbTxw664JA.jpg" width="50" />
-                  <div className="ml-4">
-                    <h3 className="font-bold">Ayu Prameswari</h3>
-                    <div className="flex items-center text-yellow-500">
-                      <i className="fas fa-star"></i>
-                      <i className="fas fa-star"></i>
-                      <i className="fas fa-star"></i>
-                      <i className="fas fa-star"></i>
-                      <i className="fas fa-star"></i>
-                    </div>
-                    <span className="text-gray-600">4.8</span>
-                  </div>
-                </div>
-                <p className="mt-4">Blouse ini sangat nyaman dipakai dan kualitas bahannya bagus! Desainnya modern tapi tetap mempertahankan motif tradisional. Pengiriman juga cepat. Pasti akan beli lagi di sini!</p>
-              </div>
-              <div className="border border-red-600 p-4 rounded-md">
-                <div className="flex items-center">
-                  <img alt="Tina Wijayanti" className="w-12 h-12 rounded-full" height="50" src="https://storage.googleapis.com/a1aa/image/f4eIfcOnoLHrkorNMp0MrNefbIVdXEtHyk4bZyeSH3UzVdd8E.jpg" width="50" />
-                  <div className="ml-4">
-                    <h3 className="font-bold">Tina Wijayanti</h3>
-                    <div className="flex items-center text-yellow-500">
-                      <i className="fas fa-star"></i>
-                      <i className="fas fa-star"></i>
-                      <i className="fas fa-star"></i>
-                      <i className="fas fa-star"></i>
-                      <i className="fas fa-star"></i>
-                    </div>
-                    <span className="text-gray-600">4.8</span>
-                  </div>
-                </div>
-                <p className="mt-4">Blouse batik kekinian yang saya terima benar-benar sesuai ekspektasi! Bahannya adem dan motifnya indah. Pengemasan juga rapi. Terima kasih, ini belanja yang memuaskan!</p>
-              </div>
-              <div className="border border-red-600 p-4 rounded-md">
-                <div className="flex items-center">
-                  <img alt="Siti Aisyah" className="w-12 h-12 rounded-full" height="50" src="https://storage.googleapis.com/a1aa/image/9jsBlfSFpD1lfEqfSP7Pe7axn78EfFSLXMHL5tklAWtXsuOeE.jpg" width="50" />
-                  <div className="ml-4">
-                    <h3 className="font-bold">Siti Aisyah</h3>
-                    <div className="flex items-center text-yellow-500">
-                      <i className="fas fa-star"></i>
-                      <i className="fas fa-star"></i>
-                      <i className="fas fa-star"></i>
-                      <i className="fas fa-star"></i>
-                      <i className="fas fa-star"></i>
-                    </div>
-                    <span className="text-gray-600">4.8</span>
-                  </div>
-                </div>
-                <p className="mt-4">Dengan harga yang ditawarkan, kualitasnya sangat baik. Terasa sepadan dengan harga, bahkan lebih baik dari ekspektasi saya.</p>
-              </div>
-            </div>
-            </div>
+            <ReviewItem id={id} />
+          </div>
           </div>
           <div className="mt-8 text-center">
             <h2 className="text-2xl font-bold">Produk Terpopuler</h2>
