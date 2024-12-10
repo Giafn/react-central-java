@@ -2,16 +2,19 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const SidebarProfile = () => {
+  // Ambil data dari localStorage
   const profileData = JSON.parse(localStorage.getItem("profile"));
-  const firstLetter = profileData.name.charAt(0).toUpperCase();
+  
+  // Jika profileData tidak ada atau tidak memiliki properti name, gunakan nilai default
+  const firstLetter = profileData?.name ? profileData.name.charAt(0).toUpperCase() : "-";
   const navigate = useNavigate();
 
   const handleNavigateToTransactions = () => {
-    navigate("/daftar-transaksi"); 
+    navigate("/daftar-transaksi");
   };
 
   const handleNavigateToProfile = () => {
-    navigate("/profile"); 
+    navigate("/profile");
   };
 
   return (
@@ -21,18 +24,18 @@ const SidebarProfile = () => {
           <div className="bg-white text-[#000000] rounded-full w-8 h-8 flex items-center justify-center">
             {firstLetter}
           </div>
-          <span>{profileData.name}</span>
+          <span>{profileData?.name || "Guest"}</span>
         </div>
       </div>
       <div
         className="bg-[#F7CDCF] p-4 rounded-lg text-center cursor-pointer"
-        onClick={handleNavigateToProfile} 
+        onClick={handleNavigateToProfile}
       >
         Akun
       </div>
       <div
         className="bg-[#F7CDCF] p-4 rounded-lg text-center cursor-pointer"
-        onClick={handleNavigateToTransactions} 
+        onClick={handleNavigateToTransactions}
       >
         Daftar Transaksi
       </div>

@@ -22,7 +22,6 @@ const PrivateRoute = ({ children, admin }) => {
           } else if (!admin && role !== "user") {
             setIsAuthorized(false);
           } else {
-            console.log(response.data);
             if (!response.data.user.is_admin && admin) {
               setIsAuthorized(false);
             } else {
