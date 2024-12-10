@@ -6,12 +6,12 @@ import NewCard from "../components/NewCard";
 import PopularCard from "../components/PopularCard";
 import CustomerReviewCard from "../components/CustomerReviewCard";
 import BannerBwh from "../components/BannerBwh";
-import HeaderGuest from "../components/HeaderGuest";
+import Header from "../components/Header";
 
 const HomeGuest = () => {
   return (
     <div>
-      <HeaderGuest />
+      <Header />
 
       <main className="">
         <section className="main-content flex items-center bg-[#C62E2E] pb-8 mt-8 relative">
