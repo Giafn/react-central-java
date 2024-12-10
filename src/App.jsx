@@ -10,7 +10,7 @@ import HomeGuest from "./pages/HomeGuest";
 import VerificationCode from "./pages/VerificationCode";
 import NewPassword from "./pages/NewPassword";
 import Profile from "./pages/Profile";
-// import Loyalitas from "./pages/Loyalitas";
+import Loyalitas from "./pages/loyalitas";
 import Keranjang from "./pages/Keranjang";
 import Pengiriman from "./pages/Pengiriman";
 import Pembayaran from "./pages/Pembayaran";
@@ -72,7 +72,7 @@ const App = () => {
             <Profile />
           </PrivateRoute>
         } />
-        {/* <Route path="/loyalitas" element={<Loyalitas />} /> */}
+        <Route path="/loyalitas" element={<Loyalitas />} />
         <Route path="/keranjang" element={
           <PrivateRoute admin={false}>
             <Keranjang />

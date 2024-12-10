@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
@@ -9,8 +10,9 @@ const Loyalitas = () => {
     { id: 3, text: "KLAIM", isDisabled: false, buttonColor: "#C62E2E", color: "white", voucher: "", minPrice: 60000 },
     { id: 4, text: "KLAIM", isDisabled: false, buttonColor: "#C62E2E", color: "white", voucher: "", minPrice: 70000 },
     { id: 5, text: "KLAIM", isDisabled: false, buttonColor: "#C62E2E", color: "white", voucher: "", minPrice: 80000 },
-    { id: 6, text: "KLAIM", isDisabled: false, buttonColor: "#C62E2E", color: "white", voucher: "", minPrice: 100000 }
+    { id: 6, text: "KLAIM", isDisabled: false, buttonColor: "#C62E2E", color: "white", voucher: "", minPrice: 100000 },
   ]);
+  const [royalty, setRoyalty] = useState({ level: "begginer", percent: 0, jumlah_transaksi: 0 });
 
   const voucherList = {
     DISKON10: { discountPercentage: 10, maxDiscount: 10000 },
@@ -18,13 +20,32 @@ const Loyalitas = () => {
     BELANJA30: { discountPercentage: 15, maxDiscount: 15000 },
     POTONGAN50: { discountPercentage: 50, maxDiscount: 50000 },
     SALE25: { discountPercentage: 25, maxDiscount: 25000 },
-    HAPPYSHOP: { discountPercentage: 30, maxDiscount: 30000 }
+    HAPPYSHOP: { discountPercentage: 30, maxDiscount: 30000 },
   };
+
+  useEffect(() => {
+    const fetchRoyalty = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get("http://localhost:3000/api/royalties/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setRoyalty(response.data);
+      } catch (error) {
+        console.error("Error fetching royalty data:", error);
+        alert("Gagal memuat data loyalitas. Silakan coba lagi.");
+      }
+    };
+
+    fetchRoyalty();
+  }, []);
 
   const showCode = (id) => {
     const voucherCodes = Object.keys(voucherList);
     const randomVoucher = voucherCodes[Math.floor(Math.random() * voucherCodes.length)];
-    
+
     setButtons((prevButtons) =>
       prevButtons.map((button) =>
         button.id === id
@@ -34,7 +55,7 @@ const Loyalitas = () => {
               isDisabled: true,
               buttonColor: "#FFFFFF",
               color: "black",
-              voucher: randomVoucher
+              voucher: randomVoucher,
             }
           : button
       )
@@ -59,16 +80,29 @@ const Loyalitas = () => {
             <div className="flex items-center space-x-4">
               <i className="fas fa-medal text-3xl text-gray-300"></i>
               <div>
-                <h2 className="text-lg font-bold">Silver</h2>
-                <p className="text-sm">3x transaksi</p>
+                <h2 className="text-lg font-bold">{royalty.level}</h2>
+                <p className="text-sm">{royalty.jumlah_transaksi}x transaksi</p>
               </div>
             </div>
             <div className="border-t border-gray-400 my-4"></div>
-            <p className="text-sm">Selesaikan 5x transaksi untuk menjadi Gold</p>
-            <div className="w-full bg-gray-300 rounded-full h-2 mt-2">
-              <div className="bg-red-500 h-2 rounded-full" style={{ width: "60%" }}></div>
-            </div>
-            <p className="mt-2 text-sm">Kamu telah menyelesaikan 3x transaksi</p>
+            {royalty.level !== "platinum" && (
+              <>
+                <p className="text-sm">
+                  Selesaikan transaksi untuk menjadi{" "}
+                  {royalty.level === "begginer" ? "Silver" : royalty.level === "silver" ? "Gold" : "Platinum"}
+                </p>
+                <div className="w-full bg-gray-300 rounded-full h-2 mt-2">
+                  <div className="bg-red-500 h-2 rounded-full" style={{ width: `${royalty.percent}%` }}></div>
+                </div>
+                <p className="mt-2 text-sm">Progres kamu: {Math.round(royalty.percent)}%</p>
+              </>
+            )}
+            {royalty.level === "platinum" && (
+              <>
+                <p className="text-sm">Selamat! Kamu telah mencapai level tertinggi: Platinum</p>
+                <div className="w-full bg-red-500 rounded-full h-2 mt-2"></div>
+              </>
+            )}
           </div>
 
           <div className="flex-1 overflow-x-auto flex space-x-4 py-4 lg:py-0">
@@ -77,9 +111,9 @@ const Loyalitas = () => {
                 key={button.id}
                 className="p-6 rounded-lg flex flex-col justify-between items-center text-center flex-shrink-0"
                 style={{
-                  width: "300px", 
-                  height: "200px", 
-                  backgroundColor: "#F7CDCF"
+                  width: "300px",
+                  height: "200px",
+                  backgroundColor: "#F7CDCF",
                 }}
               >
                 <h2 className="text-lg font-bold">
@@ -93,7 +127,7 @@ const Loyalitas = () => {
                   style={{
                     width: "200px",
                     backgroundColor: button.buttonColor,
-                    color: button.color
+                    color: button.color,
                   }}
                   onClick={() => showCode(button.id)}
                   disabled={button.isDisabled}
@@ -101,7 +135,6 @@ const Loyalitas = () => {
                   {button.text}
                 </button>
 
-                {/* Salin kode jika voucher tersedia */}
                 {button.voucher && (
                   <button
                     onClick={() => copyToClipboard(button.voucher)}
@@ -114,7 +147,6 @@ const Loyalitas = () => {
             ))}
           </div>
         </div>
-
         <div className="flex justify-center items-center mb-8">
           <a className="text-black hover:underline" href="/home">
             Belanja lagi sekarang →
