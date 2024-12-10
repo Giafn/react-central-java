@@ -1,32 +1,75 @@
-import React from 'react';
-import AdminHeader from '../components/AdminHeader';
-import AdminFooter from '../components/AdminFooter';
-import Sidebar from '../components/Sidebar';
-import TopCard from '../components/TopCard';
-import RiwayatData from '../services/RiwayatData';  
-const AdminDashboard = () => {
-  const currentDate = new Date();
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import AdminHeader from "../components/AdminHeader";
+import AdminFooter from "../components/AdminFooter";
+import Sidebar from "../components/Sidebar";
+import TopCard from "../components/TopCard";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import axios from "axios";
 
-  const currentFullDate = currentDate.toLocaleDateString('id-ID', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+const RiwayatPesanan = () => {
+  const navigate = useNavigate();
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [statusCount, setStatusCount] = useState({});
+  const [totalPenjualan, setTotalPenjualan] = useState(0);
+
+  // Fungsi untuk mengambil data transaksi dari API
+  const fetchTransactions = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/transactions/admin", {
+        params: {
+          start_date: startDate ? startDate.toISOString().split('T')[0] : '',
+          end_date: endDate ? endDate.toISOString().split('T')[0] : ''
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+      
+      if (response.data.status === "success") {
+        setTransactions(response.data.data.transactions);
+        setStatusCount(response.data.data.status_count);
+        setTotalPenjualan(response.data.data.total);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
+
+
+  // Mengambil data ketika startDate atau endDate berubah
+  useEffect(() => {
+    fetchTransactions();
+  }, [startDate, endDate]);
+
+  // Menghitung total penjualan, pesanan yang diproses, selesai, dan dibatalkan
+  const pesananProses = statusCount["on process"] || 0;
+  const pesananSelesai = statusCount["selesai"] || 0;
+  const pesananDibatalkan = statusCount["batal"] || 0;
+  const pesananKembali = statusCount["di kembalikan"] || 0;
+
+  const currentFullDate = new Date().toLocaleDateString("id-ID", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric"
   });
 
-  const currentMonthYear = `${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`;
-
-  const totalPenjualan = RiwayatData.reduce((acc, item) => acc + item.jumlah, 0);
-  const totalPesananProses = RiwayatData.filter(item => item.status === 'Proses').length;
-  const totalPesananSelesai = RiwayatData.filter(item => item.status === 'Selesai').length;
-  const totalPengembalian = RiwayatData.filter(item => item.status === 'Dibatalkan').length;
-
   const cardData = [
-    { title: 'Total Penjualan', value: `Rp. ${totalPenjualan.toLocaleString()}`, date: currentMonthYear },
-    { title: 'Pesanan dalam proses', value: totalPesananProses, date: currentMonthYear },
-    { title: 'Pesanan selesai', value: totalPesananSelesai, date: currentMonthYear },
-    { title: 'Pengembalian', value: totalPengembalian, date: currentMonthYear },
+    { title: "Total Penjualan", value: `Rp ${totalPenjualan.toLocaleString()}` },
+    { title: "Pesanan Dalam Proses", value: pesananProses },
+    { title: "Pesanan Selesai", value: pesananSelesai },
+    { title: "Pesanan Dibatalkan", value: pesananDibatalkan },
+    { title: "Pesanan Dikembalikan", value: pesananKembali }
   ];
+
+  const handleUserClick = (id) => {
+    navigate(`/admin/detail-transaksi/${id}`);
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -41,15 +84,14 @@ const AdminDashboard = () => {
               <h3 className="text-lg font-bold text-gray-700">Tanggal: {currentFullDate}</h3>
             </div>
 
-            <hr className="border-gray-300 mb-6" />
+            <div className="border-b mb-4"></div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
               {cardData.map((card, index) => (
                 <TopCard
                   key={index}
                   title={card.title}
                   value={card.value}
-                  date={card.date}
                 />
               ))}
             </div>
@@ -62,4 +104,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default RiwayatPesanan;
