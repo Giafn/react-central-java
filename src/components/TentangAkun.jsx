@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import NotipHapus from "./NotipHapus"; 
+import axios from "axios";
+import NotipHapus from "./NotipHapus";
 
 const TentangAkun = () => {
   const [showModal, setShowModal] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleDeleteClick = () => {
     setShowModal(true);
@@ -13,9 +16,41 @@ const TentangAkun = () => {
     setShowModal(false);
   };
 
-  const handleConfirmDelete = () => {
-    setIsDeleted(true);
-    setShowModal(false);
+  const handleConfirmDelete = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Mengambil token dari localStorage
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError("Token tidak ditemukan. Anda perlu login ulang.");
+        return;
+      }
+
+      // Mengirim request DELETE ke API
+      const response = await axios.delete(
+        "http://localhost:3000/api/users/delete",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Menambahkan token ke header
+          },
+        }
+      );
+
+      if (response.data.status === "success") {
+        setIsDeleted(true);
+      } else {
+        setError("Gagal menghapus akun. Coba lagi nanti.");
+      }
+    } catch (error) {
+      setError("Terjadi kesalahan saat menghapus akun.");
+      console.error("Error deleting account:", error);
+    } finally {
+      setLoading(false);
+      setShowModal(false);
+    }
   };
 
   return (
@@ -26,14 +61,16 @@ const TentangAkun = () => {
           <p className="text-sm mb-4">
             Menghapus akun Anda akan menghapus semua data yang terkait dengan
             akun ini. Pastikan Anda telah memikirkan keputusan ini dengan
-            Seksama.
+            seksama.
           </p>
           <button
             className="bg-[#C62E2E] text-white py-2 px-4 rounded"
             onClick={handleDeleteClick}
+            disabled={loading} // Nonaktifkan tombol selama proses penghapusan
           >
-            Hapus Akun
+            {loading ? "Menghapus..." : "Hapus Akun"}
           </button>
+          {error && <p className="text-red-600 mt-4">{error}</p>}
         </>
       ) : (
         <p className="text-green-600">Akun Anda telah berhasil dihapus.</p>

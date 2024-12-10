@@ -2,14 +2,16 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBackSharp } from "react-icons/io5";
 import Footer from "../components/Footer";
+import axios from "axios";
 
 const NewPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handlePasswordChange = (event) => {
+  const handlePasswordChange = async (event) => {
     event.preventDefault();
 
     if (newPassword !== confirmPassword) {
@@ -17,12 +19,28 @@ const NewPassword = () => {
       return;
     }
 
-    setIsLoading(true); 
-    setTimeout(() => {
-      alert("Kata Sandi Telah Diubah");
-      setIsLoading(false); 
-      navigate("/login"); 
-    }, 2000);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Mengirim permintaan untuk reset password
+      const response = await axios.patch("http://localhost:3000/api/users/reset-password", {
+        otp: "12345", // Gantilah dengan OTP yang valid
+        email: "giafn@gmail.com", // Gantilah dengan email yang valid
+        new_password: newPassword,
+      });
+
+      if (response.data.message === "Password updated") {
+        alert("Kata Sandi Telah Diubah");
+        navigate("/login");
+      } else {
+        setError("Gagal mengubah kata sandi. Coba lagi nanti.");
+      }
+    } catch (error) {
+      setError("Terjadi kesalahan saat mengubah kata sandi.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -71,9 +89,11 @@ const NewPassword = () => {
             >
               {isLoading ? "Mengubah..." : "Ubah Kata Sandi"}
             </button>
+            {error && <p className="text-red-600 mt-4">{error}</p>}
           </form>
         </div>
       </main>
+
       <Footer />
     </div>
   );

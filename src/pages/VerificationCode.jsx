@@ -2,17 +2,28 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBackSharp } from "react-icons/io5";
 import Footer from "../components/Footer";
+import axios from "axios";
 
 const VerificationCode = () => {
   const [verificationCode, setVerificationCode] = useState("");
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleVerification = (event) => {
+  const handleVerification = async (event) => {
     event.preventDefault();
-    if (verificationCode === "123456") {
-      navigate("/new-password");
-    } else {
-      alert("Kode verifikasi salah. Silakan coba lagi.");
+    setError(null);
+
+    try {
+      // Mengirim permintaan untuk cek OTP
+      const response = await axios.post("http://localhost:3000/api/users/cek-otp", { otp: verificationCode });
+
+      if (response.data.message === "OTP valid") {
+        navigate("/new-password"); // Arahkan ke halaman reset kata sandi
+      } else {
+        setError("Kode verifikasi salah. Silakan coba lagi.");
+      }
+    } catch (error) {
+      setError("Terjadi kesalahan saat memverifikasi OTP.");
     }
   };
 
@@ -29,7 +40,8 @@ const VerificationCode = () => {
         <div className="bg-red-100 p-8 rounded-lg w-[600px] shadow-lg relative">
           <button
             onClick={() => navigate("/forgot-password")}
-            className="absolute top-4 left-4 text-[#C62E2E] hover:text-red-700" >
+            className="absolute top-4 left-4 text-[#C62E2E] hover:text-red-700"
+          >
             <IoArrowBackSharp size={24} />
           </button>
 
@@ -44,15 +56,19 @@ const VerificationCode = () => {
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value)}
               className="w-full p-2 border border-red-600 rounded-[15px] mb-4"
-              required/>
+              required
+            />
             <button
               type="submit"
-              className="w-full bg-[#C62E2E] text-white py-2 rounded font-bold hover:bg-red-700" >
+              className="w-full bg-[#C62E2E] text-white py-2 rounded font-bold hover:bg-red-700"
+            >
               Lanjut
             </button>
+            {error && <p className="text-red-600 mt-4">{error}</p>}
           </form>
         </div>
       </main>
+
       <Footer />
     </div>
   );

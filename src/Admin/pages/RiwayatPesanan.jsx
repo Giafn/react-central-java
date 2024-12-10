@@ -58,8 +58,8 @@ const RiwayatPesanan = () => {
     { title: "Pesanan Dikembalikan", value: pesananKembali }
   ];
 
-  const handleUserClick = (customerId) => {
-    navigate(`/admin/detail-pembeli/${customerId}`);
+  const handleUserClick = (id) => {
+    navigate(`/admin/detail-transaksi/${id}`);
   };
 
   return (

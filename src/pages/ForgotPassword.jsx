@@ -1,21 +1,35 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Footer from "../components/Footer"; 
-import { IoArrowBackSharp } from "react-icons/io5"; 
+import Footer from "../components/Footer";
+import { IoArrowBackSharp } from "react-icons/io5";
+import axios from "axios";
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState(""); 
-  const [isLoading, setIsLoading] = useState(false); 
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleResetPassword = (event) => {
+  const handleResetPassword = async (event) => {
     event.preventDefault();
-    setIsLoading(true); 
-    setTimeout(() => {
-      alert(`Link untuk reset kata sandi telah dikirim ke ${email}.`);
-      setIsLoading(false); 
-      navigate("/verification-code"); 
-    }, 2000); 
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Mengirim permintaan untuk cek email
+      const response = await axios.post("http://localhost:3000/api/users/cek-email", { email });
+
+      if (response.data.message === "Email valid") {
+        alert(`Link untuk reset kata sandi telah dikirim ke ${email}.`);
+        navigate("/verification-code"); // Arahkan ke halaman verifikasi kode
+      } else {
+        setError("Email tidak valid atau tidak terdaftar.");
+      }
+    } catch (error) {
+      setError("Terjadi kesalahan saat memeriksa email. Silakan coba lagi.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -28,10 +42,7 @@ const ForgotPassword = () => {
       </header>
 
       <main className="flex-grow flex justify-center items-center py-10">
-        <div
-          className="bg-red-100 p-8 rounded-lg w-[851px] shadow-lg relative"
-          style={{ maxWidth: "100%", boxSizing: "border-box" }}
-        >
+        <div className="bg-red-100 p-8 rounded-lg w-[851px] shadow-lg relative">
           <div className="max-w-[600px] mx-auto">
             <button
               onClick={() => navigate("/login")}
@@ -60,6 +71,7 @@ const ForgotPassword = () => {
               >
                 {isLoading ? "Mengirim..." : "Lanjut"}
               </button>
+              {error && <p className="text-red-600 mt-4">{error}</p>}
             </form>
           </div>
         </div>

@@ -22,6 +22,7 @@ import Makanan from "./pages/Makanan";
 import Pakaian from "./pages/Pakaian";
 import Terbaru from "./pages/Terbaru";
 import ProductDetail from "./pages/ProductDetail";
+import DetailTransaksi from "./Admin/pages/DetailTransaksi";
 
 import AdminDashboard from "./Admin/pages/AdminDashboard";
 import RiwayatPesanan from "./Admin/pages/RiwayatPesanan";
@@ -144,11 +145,11 @@ const App = () => {
           }
         />
         <Route
-          path="/admin/detail-pembeli/:customerId"
+          path="/admin/detail-transaksi/:transactionId"
           element={
             <PrivateRoute admin={true}>
               <main>
-                <DetailPembeli />
+                <DetailTransaksi />
               </main>
             </PrivateRoute>
           }
