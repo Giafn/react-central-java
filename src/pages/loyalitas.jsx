@@ -107,7 +107,6 @@ const Loyalitas = () => {
               >
                 <h2 className="text-lg font-bold">{voucher.name}</h2>
                 <p className="text-sm">Voucher Code: {voucher.code}</p>
-                <p className="text-sm">Sisa: {voucher.remaining}</p>
                 <p className="text-sm">
                   Minimal belanja Rp. {voucher.min_expense.toLocaleString("id-ID")}
                 </p>

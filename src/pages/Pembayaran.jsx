@@ -11,49 +11,18 @@ const Pembayaran = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [isPaymentStarted, setIsPaymentStarted] = useState(false);
-  const [timer, setTimer] = useState(15 * 60); 
+  const [timer, setTimer] = useState(15 * 60);
   const [voucherCode, setVoucherCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [qrUrl, setQrUrl] = useState(""); // State to hold QR URL
   const [transactionId, setTransactionId] = useState(null); // State for storing transaction ID
+  const [voucherId, setVoucherId] = useState(0); // State for storing voucher ID
 
   const { totalBelanja = 0, selectedProducts = [], address } = location.state || {};
 
   const biayaOngkosKirim = 20000;
   const biayaAdmin = 1000;
   const totalBeforeDiscount = totalBelanja + biayaOngkosKirim + biayaAdmin;
-
-  const voucherList = {
-    DISKON10: { discountPercentage: 10, maxDiscount: 10000, minPurchase: 40000 },
-    HEMAT20: { discountPercentage: 20, maxDiscount: 20000, minPurchase: 50000 },
-    BELANJA30: { discountPercentage: 15, maxDiscount: 15000, minPurchase: 60000 },
-    POTONGAN50: { discountPercentage: 50, maxDiscount: 50000, minPurchase: 70000 },
-    SALE25: { discountPercentage: 25, maxDiscount: 25000, minPurchase: 80000 },
-    HAPPYSHOP: { discountPercentage: 30, maxDiscount: 30000, minPurchase: 100000 },
-  };
-
-  const applyVoucher = () => {
-    if (voucherCode in voucherList) {
-      const voucher = voucherList[voucherCode];
-      if (totalBelanja >= voucher.minPurchase) {
-        if (voucher.discountPercentage) {
-          const calculatedDiscount = Math.min(
-            (totalBelanja * voucher.discountPercentage) / 100,
-            voucher.maxDiscount
-          );
-          setDiscount(calculatedDiscount);
-        } else if (voucher.discountValue) {
-          setDiscount(voucher.discountValue);
-        }
-      } else {
-        alert(`Voucher ini memerlukan minimal belanja Rp. ${voucher.minPurchase.toLocaleString()}`);
-        setDiscount(0);
-      }
-    } else {
-      alert("Kode voucher tidak valid!");
-      setDiscount(0);
-    }
-  };
 
   const totalYangHarusDibayarkan = totalBeforeDiscount - discount;
 
@@ -79,17 +48,26 @@ const Pembayaran = () => {
     }
   }, [isPaymentStarted]);
 
+  // cegah refresh
+  useEffect(() => {
+    if (!location.state) {
+      navigate("/keranjang");
+    }
+  }, [location.state, navigate]);
+  
+
+
   const handleStartPayment = async () => {
     try {
-
       const addresString = `${address.address}, ${address.address_name}, ${address.recipient}, ${address.phone_number}`;
       const requestData = {
+        voucher_id: voucherId,
         address: addresString,
-        total_amount: totalYangHarusDibayarkan.toString(), 
+        total_amount: totalYangHarusDibayarkan.toString(),
         items: selectedProducts.map(item => ({
-          items_id: item.id, 
-          qty: item.quantity, 
-          amount: item.price * item.quantity
+          items_id: item.id,
+          qty: item.quantity,
+          amount: item.price * item.quantity,
         })),
       };
       const token = localStorage.getItem("token");
@@ -112,7 +90,6 @@ const Pembayaran = () => {
   };
 
   const handleCheckStatus = async () => {
-    console.log(transactionId);
     if (transactionId) {
       try {
         const token = localStorage.getItem("token");
@@ -123,6 +100,9 @@ const Pembayaran = () => {
         });
         if (response.data.status === "success" && response.data.data.payment_status === "settlement") {
           setIsPaid(true);
+          localStorage.removeItem("transactions");
+          alert("Pembayaran berhasil!");
+          navigate("/daftar-transaksi", { state: { isPaid: true } });
         } else {
           alert("Pembayaran belum berhasil, coba lagi nanti.");
         }
@@ -148,6 +128,62 @@ const Pembayaran = () => {
 
   const cancelBack = () => {
     setIsModalOpen(false);
+  };
+
+  // Updated applyVoucher function with API request
+  const applyVoucher = async () => {
+    try {
+      // Make API call to check the voucher
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        "http://localhost:3000/api/vouchers/check",
+        { code: voucherCode },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Handle the API response
+      if (response.data.status === "success") {
+        const voucherData = response.data.data;
+        if (totalBelanja >= voucherData.min_expense) {
+          let calculatedDiscount = 0;
+
+          // Check the type of discount and apply accordingly
+          if (voucherData.disc_type === "persen") {
+            // Apply percentage discount
+            calculatedDiscount = (totalBelanja * voucherData.disc) / 100;
+          } else if (voucherData.disc_type === "nominal") {
+            // Apply nominal discount
+            calculatedDiscount = voucherData.disc;
+          } else if (voucherData.disc_type === "ongkir") {
+            // Apply discount to shipping cost only
+            calculatedDiscount = Math.min(voucherData.disc, biayaOngkosKirim);
+          }
+
+          // ubah state voucherId
+          setVoucherId(voucherData.id);
+
+          // Apply the discount, ensuring it doesn't exceed the maximum limit
+          setDiscount(Math.min(calculatedDiscount, voucherData.disc));
+          alert("Voucher berhasil diterapkan!");
+        } else {
+          alert(
+            `Voucher ini memerlukan minimal belanja Rp. ${voucherData.min_expense.toLocaleString()}`
+          );
+          setDiscount(0);
+        }
+      } else {
+        alert("Voucher tidak valid atau gagal memverifikasi.");
+        setDiscount(0);
+      }
+    } catch (error) {
+      console.error("Error checking voucher:", error);
+      alert(error.response?.data?.message || "Terjadi kesalahan saat memverifikasi voucher.");
+      setDiscount(0);
+    }
   };
 
   return (

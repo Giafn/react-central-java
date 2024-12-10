@@ -146,7 +146,7 @@ const Keranjang = () => {
   return (
     <div className="bg-white text-gray-800">
       <Header />
-      <main className="max-w-6xl mx-auto p-4 mt-20">
+      <main className="max-w-6xl mx-auto p-4 mt-20 min-h-screen">
         <h2 className="text-2xl pb-4 font-bold">Keranjang</h2>
         <hr className="mb-4" />
         <div className="flex space-x-4">
