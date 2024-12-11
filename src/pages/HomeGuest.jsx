@@ -19,12 +19,12 @@ const HomeGuest = () => {
             <h1 className="text-3xl text-white ml-8 mb-4">
               SELAMAT DATANG DI <p> CENTRAL JAVA!</p>
             </h1>
-            <p className="text-white ml-8 mb-4">
+            <div className="text-white ml-8 mb-4">
               Temukan keunikan produk khas Jawa Tengah, dari batik, kerajinan{" "}
-              <p>tangan, hingga makanan tradisional. Setiap produk membawa keaslian </p>
-              <p>budaya dan kualitas terbaik dari pengrajin lokal. Dukung produk lokal,</p>
+              <span>tangan, hingga makanan tradisional. Setiap produk membawa keaslian </span>
+              <span>budaya dan kualitas terbaik dari pengrajin lokal. Dukung produk lokal,</span>
               rasakan autentiknya Jawa Tengah!
-            </p>
+            </div>
             <Link to="/terpopular" className="shop-button bg-[#f4b5b5] text-black ml-8 py-2 px-4 rounded">
               Belanja Sekarang
             </Link>

@@ -108,10 +108,10 @@ function PopularCard() {
                 <div className="card-body p-4 flex flex-col justify-between h-[180px]">
                   <div>
                     <div className="rating flex items-center gap-1 text-yellow-400">
-                      {[...Array(product.rating)].map((_, i) => (
+                      {[...Array(Math.round(product.rating))].map((_, i) => (
                         <i key={i} className="fas fa-star"></i>
                       ))}
-                      {[...Array(5 - product.rating)].map((_, i) => (
+                      {[...Array(5 - Math.round(product.rating))].map((_, i) => (
                       <i key={i} className="fas fa-star text-gray-300"></i>
                     ))}
                       <span className="text-sm text-gray-700 ml-2">

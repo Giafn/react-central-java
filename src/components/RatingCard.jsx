@@ -7,7 +7,7 @@ const RatingCard = ({ review }) => {
           <h4 className="font-semibold text-lg">{review.name}</h4>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              {[...Array(review.rating)].map((_, index) => (
+              {[...Array(Math.round(review.rating))].map((_, index) => (
                 <i key={index} className="fas fa-star text-yellow-400"></i>
               ))}
             </div>
