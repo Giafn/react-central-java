@@ -45,12 +45,14 @@ const Profile = () => {
     setShowPolicies(false);
   };
 
-  const showWhatsAppChatHandler = () => {
+  const showWhatsAppChatHandler = (e) => {
+    e.preventDefault();
     setShowWhatsAppChat(true);
     setShowPolicies(false);
   };
 
-  const showPoliciesHandler = () => {
+  const showPoliciesHandler = (e) => {
+    e.preventDefault();
     setShowPolicies(true);
     setShowWhatsAppChat(false);
   };
