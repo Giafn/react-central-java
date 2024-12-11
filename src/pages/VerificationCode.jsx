@@ -9,6 +9,11 @@ const VerificationCode = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  // cek apakah ada email_reset di localStorage
+  if (!localStorage.getItem("email_reset")) {
+    navigate("/forgot-password"); // Arahkan ke halaman lupa kata sandi jika tidak ada email_reset
+  }
+
   const handleVerification = async (event) => {
     event.preventDefault();
     setError(null);

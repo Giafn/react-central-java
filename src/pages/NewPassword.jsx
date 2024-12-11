@@ -19,6 +19,13 @@ const NewPassword = () => {
       return;
     }
 
+    // cek email reset di localStorage
+    if (!localStorage.getItem("email_reset")) {
+      navigate("/forgot-password"); // Arahkan ke halaman lupa kata sandi jika tidak ada email_reset
+    }
+
+    const email = localStorage.getItem("email_reset");
+
     setIsLoading(true);
     setError(null);
 
@@ -26,7 +33,7 @@ const NewPassword = () => {
       // Mengirim permintaan untuk reset password
       const response = await axios.patch("http://localhost:3000/api/users/reset-password", {
         otp: "12345", // Gantilah dengan OTP yang valid
-        email: "giafn@gmail.com", // Gantilah dengan email yang valid
+        email: email,
         new_password: newPassword,
       });
 
