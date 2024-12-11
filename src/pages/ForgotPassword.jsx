@@ -21,6 +21,12 @@ const ForgotPassword = () => {
 
       if (response.data.message === "Email valid") {
         alert(`Link untuk reset kata sandi telah dikirim ke ${email}.`);
+
+        // cek jika ada email_reset di localStorage
+        if (localStorage.getItem("email_reset")) {
+          localStorage.removeItem("email_reset");
+        }
+
         localStorage.setItem("email_reset", email);
         navigate("/verification-code"); // Arahkan ke halaman verifikasi kode
       } else {
